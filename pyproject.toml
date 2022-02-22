@@ -10,7 +10,17 @@ requests = "^2.25.1"
 pandas = ">=1.2.0"
 
 [tool.poetry.dev-dependencies]
+black = "^22.1.0"
+isort = "^5.10.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+py_version = 39
+line_length = 120
