@@ -1,17 +1,19 @@
 [tool.poetry]
 name = "mangadex-mass-uploader"
 version = "0.1.0"
-description = ""
+description = "beat the frontend devs to the punch by providing a lower quality user experience and excusing it with 'it's not official tho'"
 authors = ["Xnot <xnot@outlook.com>"]
 
 [tool.poetry.dependencies]
 python = "=3.9"
-requests = "^2.25.1"
-pandas = ">=1.2.0"
+requests = ">=2.25.1"
+Kivy = ">=2.0.0"
+plyer = ">=2.0.0"
+natsort = ">=8.1.0"
 
 [tool.poetry.dev-dependencies]
-black = "^22.1.0"
-isort = "^5.10.1"
+black = ">=22.1.0"
+isort = ">=5.10.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
