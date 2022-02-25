@@ -1,3 +1,4 @@
+import logging
 from time import time
 from typing import IO, Union
 
@@ -7,7 +8,14 @@ import requests
 class MangaDexAPI:
     API_URL = "https://api.mangadex.org"
 
-    def __init__(self, username: str, password: str):
+    def __init__(self):
+        self.logger = self.logger = logging.getLogger("api_logger")
+        self._session_token = None
+        self._refresh_token = None
+        self._refresh_at = None
+        self._upload_session = None
+
+    def login(self, username: str, password: str):
         token = self.send_request(
             "post",
             "auth/login",
@@ -19,8 +27,7 @@ class MangaDexAPI:
         self._refresh_at = time() + 880
         self._upload_session = self.get_upload_session()
         if self._upload_session:
-            # TODO wrap in logger
-            print("upload session will get nuked btw")
+            self.logger.warning("You have an existing upload session. It will be deleted once uploading begins.")
 
     def __del__(self):
         self.send_request("post", "auth/logout", True)
@@ -38,7 +45,6 @@ class MangaDexAPI:
             kwargs |= {"headers": {"Authorization": f"Bearer {self.session_token}"}}
         response = requests.request(**kwargs).json()
         if not suppress_error and response["result"] != "ok":
-            # TODO wrap in logger
             raise requests.HTTPError(f"I am not ok: {response['errors']}")
         return response
 
