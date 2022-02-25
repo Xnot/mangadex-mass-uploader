@@ -1,0 +1,120 @@
+GridLayout:
+    cols: 1
+    rows: 2
+
+    ScreenManager:
+        id: manager
+        LoginScreen:
+        MassUploaderScreen:
+    TextInput:
+        id: log_output
+        text: "mass_uploader.txt"
+        multiline: True
+        readonly: True
+        auto_indent: True
+        size_hint_y: 0.25
+
+<LoginScreen>:
+    name: "login_screen"
+
+    GridLayout:
+        cols: 2
+        rows: 3
+
+        Label:
+            text: "username:"
+
+        TextInput:
+            id: username
+            multiline: False
+
+        Label:
+            text: "password:"
+
+        TextInput:
+            id: password
+            multiline: False
+            password: True
+
+        Button:
+            text: "Login"
+            on_release:
+                root.manager.get_screen("login_screen").login()
+
+
+<MassUploaderScreen>:
+    name: "mass_uploader_screen"
+
+    GridLayout:
+        cols: 4
+
+        Label:
+            text: "manga_ids:"
+        TextInput:
+            id: manga_ids
+            multiline: True
+
+        Label:
+            text: "volumes:"
+        TextInput:
+            id: volumes
+            multiline: True
+
+        Label:
+            text: "chapters:"
+        TextInput:
+            id: chapters
+            multiline: True
+
+        Label:
+            text: "titles:"
+        TextInput:
+            id: titles
+            multiline: True
+
+        Label:
+            text: "languages:"
+        TextInput:
+            id: languages
+            multiline: True
+
+        Label:
+            text: "group 1 ids:"
+        TextInput:
+            id: group_1_ids
+            multiline: True
+
+        Label:
+            text: "group 2 ids:"
+        TextInput:
+            id: group_2_ids
+            multiline: True
+
+        Label:
+            text: "group 3 ids:"
+        TextInput:
+            id: group_3_ids
+            multiline: True
+
+        Label:
+            text: "group 4 ids:"
+        TextInput:
+            id: group_4_ids
+            multiline: True
+
+        Label:
+            text: "group 5 ids:"
+        TextInput:
+            id: group_5_ids
+            multiline: True
+
+        Button:
+            id: files
+            text: "files"
+            on_release:
+                root.manager.get_screen("mass_uploader_screen").select_files()
+
+        Button:
+            text: "upload"
+            on_release:
+                root.manager.get_screen("login_screen").login()
