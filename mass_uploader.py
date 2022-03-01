@@ -1,9 +1,11 @@
 import logging
+import os
 import threading
+from itertools import zip_longest
 
 from kivy.app import App
-from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
+from kivy.uix.textinput import TextInput
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
@@ -20,12 +22,12 @@ def threaded(fun: callable) -> callable:
 
 
 class APILogHandler(logging.Handler):
-    def __init__(self, output_label: Label):
+    def __init__(self, output_panel: TextInput):
         super().__init__()
-        self.output_label = output_label
+        self.output_panel = output_panel
 
     def emit(self, record: logging.LogRecord) -> None:
-        self.output_label.text += f"\n\n{self.format(record)}"
+        self.output_panel.text += f"\n\n{self.format(record)}"
 
 
 class LoginScreen(Screen):
@@ -39,13 +41,68 @@ class LoginScreen(Screen):
             self.manager.current = "mass_uploader_screen"
 
 
+class ChapterTextInput(TextInput):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # kinda cancer but ok
+        self.bind(text=lambda *args: self.parent.parent.parent.update_preview())
+
+
 class MassUploaderScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.selected_files = []
+
     @threaded
     def select_files(self):
         self.selected_files = filechooser.open_file(
             title="Chapter archives", multiple=True, filters=["*.zip", "*.cbz", "*"]
         )
         self.selected_files = natsorted(self.selected_files)
+        self.update_preview()
+
+    def parse_chapters(self):
+        chapter_count = len(self.selected_files)
+        if not chapter_count:
+            return []
+        chapters = {"file": self.selected_files}
+        for field, element in self.ids.items():
+            if not isinstance(element, ChapterTextInput):
+                continue
+            parsed_values = [value.strip() for value in element.text.split("\n")]
+            # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
+            if len(parsed_values) == 1 and field == "chapter" and parsed_values[0].isdigit():
+                parsed_values = range(int(parsed_values[0]), int(parsed_values[0]) + chapter_count)
+            # for non-numerical chapter and other fields, single inputs are repeated
+            elif len(parsed_values) == 1:
+                parsed_values = parsed_values * chapter_count
+            # get rid of invalid/extra inputs
+            parsed_values = [None if value == "" else value for value in parsed_values]
+            if len(parsed_values) > chapter_count:
+                parsed_values = parsed_values[:chapter_count]
+            chapters[field] = parsed_values
+        # transpose into [{"file": 1, "chapter": 1}, {"file": 2, "chapter": 2}]
+        chapter_dicts = []
+        for chapter in zip_longest(*chapters.values()):
+            chapter_dicts.append({key: value for key, value in zip(chapters.keys(), chapter)})
+        return chapter_dicts
+
+    @threaded
+    def update_preview(self):
+        preview_text = ""
+        for chapter in self.parse_chapters():
+            preview_text += f"file: {os.path.basename(chapter['file'])}\n"
+            for field in ["manga_id", "volume", "chapter", "title", "language"]:
+                preview_text += f"{field}: {chapter[field]}\n"
+            for group_number in range(1, 6):
+                preview_text += f"{f'group_{group_number}_id'}: {chapter[f'group_{group_number}_id']}\n"
+            preview_text += "\n"
+        self.ids["preview"].text = preview_text
+
+    @threaded
+    def mass_upload(self):
+        for chapter in self.parse_chapters():
+            pass
 
 
 class MassUploaderApp(App):

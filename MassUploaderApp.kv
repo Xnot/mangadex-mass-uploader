@@ -46,75 +46,86 @@ GridLayout:
     name: "mass_uploader_screen"
 
     GridLayout:
-        cols: 4
+        cols: 2
 
-        Label:
-            text: "manga_ids:"
+        GridLayout:
+            cols: 4
+
+            Label:
+                text: "manga_id:"
+            ChapterTextInput:
+                id: manga_id
+                multiline: True
+
+            Label:
+                text: "volume:"
+            ChapterTextInput:
+                id: volume
+                multiline: True
+
+            Label:
+                text: "chapter:"
+            ChapterTextInput:
+                id: chapter
+                multiline: True
+
+            Label:
+                text: "title:"
+            ChapterTextInput:
+                id: title
+                multiline: True
+
+            Label:
+                text: "language:"
+            ChapterTextInput:
+                id: language
+                multiline: True
+
+            Label:
+                text: "group 1 id:"
+            ChapterTextInput:
+                id: group_1_id
+                multiline: True
+
+            Label:
+                text: "group 2 id:"
+            ChapterTextInput:
+                id: group_2_id
+                multiline: True
+
+            Label:
+                text: "group 3 id:"
+            ChapterTextInput:
+                id: group_3_id
+                multiline: True
+
+            Label:
+                text: "group 4 id:"
+            ChapterTextInput:
+                id: group_4_id
+                multiline: True
+
+            Label:
+                text: "group 5 id:"
+            ChapterTextInput:
+                id: group_5_id
+                multiline: True
+
+            Button:
+                id: choose_files_button
+                text: "choose files"
+                on_release:
+                    root.manager.get_screen("mass_uploader_screen").select_files()
+
+            Button:
+                id: mass_upload_button
+                text: "upload"
+                on_release:
+                    root.manager.get_screen("mass_uploader_screen").mass_upload()
+
         TextInput:
-            id: manga_ids
+            id: preview
+            text: "preview.txt"
             multiline: True
-
-        Label:
-            text: "volumes:"
-        TextInput:
-            id: volumes
-            multiline: True
-
-        Label:
-            text: "chapters:"
-        TextInput:
-            id: chapters
-            multiline: True
-
-        Label:
-            text: "titles:"
-        TextInput:
-            id: titles
-            multiline: True
-
-        Label:
-            text: "languages:"
-        TextInput:
-            id: languages
-            multiline: True
-
-        Label:
-            text: "group 1 ids:"
-        TextInput:
-            id: group_1_ids
-            multiline: True
-
-        Label:
-            text: "group 2 ids:"
-        TextInput:
-            id: group_2_ids
-            multiline: True
-
-        Label:
-            text: "group 3 ids:"
-        TextInput:
-            id: group_3_ids
-            multiline: True
-
-        Label:
-            text: "group 4 ids:"
-        TextInput:
-            id: group_4_ids
-            multiline: True
-
-        Label:
-            text: "group 5 ids:"
-        TextInput:
-            id: group_5_ids
-            multiline: True
-
-        Button:
-            id: files
-            text: "files"
-            on_release:
-                root.manager.get_screen("mass_uploader_screen").select_files()
-
-        Button:
-            text: "upload"
-            on_release:
-                root.manager.get_screen("login_screen").login()
+            readonly: True
+            size_hint_x: 0.25
