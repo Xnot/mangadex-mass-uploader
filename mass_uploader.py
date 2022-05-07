@@ -96,6 +96,7 @@ class MassUploaderScreen(Screen):
 
     @threaded
     def update_preview(self):
+        scroll_position = self.ids["preview"].scroll_y
         preview_text = ""
         for chapter in self.parse_chapters():
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
@@ -103,6 +104,8 @@ class MassUploaderScreen(Screen):
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
         self.ids["preview"].text = preview_text
+        max_scroll = max(self.ids["preview"].minimum_height - self.ids["preview"].height, 0)
+        self.ids["preview"].scroll_y = min(scroll_position, max_scroll)
 
     @threaded
     def mass_upload(self):
