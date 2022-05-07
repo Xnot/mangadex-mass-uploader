@@ -78,13 +78,20 @@ class MassUploaderScreen(Screen):
                 parsed_values = parsed_values * chapter_count
             # get rid of invalid/extra inputs
             parsed_values = [None if value == "" else value for value in parsed_values]
-            if len(parsed_values) > chapter_count:
-                parsed_values = parsed_values[:chapter_count]
+            parsed_values = parsed_values[:chapter_count]
             chapters[field] = parsed_values
         # transpose into [{"file": 1, "chapter": 1}, {"file": 2, "chapter": 2}]
         chapter_dicts = []
         for chapter in zip_longest(*chapters.values()):
-            chapter_dicts.append({key: value for key, value in zip(chapters.keys(), chapter)})
+            chapter_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
+            chapter_dict["groups"] = [chapter_dict.pop(f"group_{group_number}_id") for group_number in range(1, 6)]
+            chapter_dict["chapter_draft"] = {
+                "volume": chapter_dict.pop("volume"),
+                "chapter": chapter_dict.pop("chapter"),
+                "title": chapter_dict.pop("title"),
+                "translatedLanguage": chapter_dict.pop("language"),
+            }
+            chapter_dicts.append(chapter_dict)
         return chapter_dicts
 
     @threaded
@@ -92,17 +99,22 @@ class MassUploaderScreen(Screen):
         preview_text = ""
         for chapter in self.parse_chapters():
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
-            for field in ["manga_id", "volume", "chapter", "title", "language"]:
+            for field in ["manga_id", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
-            for group_number in range(1, 6):
-                preview_text += f"{f'group_{group_number}_id'}: {chapter[f'group_{group_number}_id']}\n"
             preview_text += "\n"
         self.ids["preview"].text = preview_text
 
     @threaded
     def mass_upload(self):
-        for chapter in self.parse_chapters():
-            pass
+        chapters = self.parse_chapters()
+        for idx, chapter in chapters:
+            self.manger.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
+            try:
+                self.manager.md_api.upload_chapter(chapter)
+            except Exception as exception:
+                self.manger.logger.error(exception)
+                self.manger.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
+        self.manger.logger.info(f"Done")
 
 
 class MassUploaderApp(App):
