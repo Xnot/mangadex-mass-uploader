@@ -3,6 +3,10 @@ import os
 import threading
 from itertools import zip_longest
 
+from kivy.config import Config
+
+Config.read("kivy_config.ini")
+
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
@@ -73,6 +77,7 @@ class MassUploaderScreen(Screen):
             # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
             if len(parsed_values) == 1 and field == "chapter" and parsed_values[0].isdigit():
                 parsed_values = range(int(parsed_values[0]), int(parsed_values[0]) + chapter_count)
+                parsed_values = [str(value) for value in parsed_values]
             # for non-numerical chapter and other fields, single inputs are repeated
             elif len(parsed_values) == 1:
                 parsed_values = parsed_values * chapter_count
@@ -83,41 +88,47 @@ class MassUploaderScreen(Screen):
         # transpose into [{"file": 1, "chapter": 1}, {"file": 2, "chapter": 2}]
         chapter_dicts = []
         for chapter in zip_longest(*chapters.values()):
-            chapter_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
-            chapter_dict["groups"] = [chapter_dict.pop(f"group_{group_number}_id") for group_number in range(1, 6)]
-            chapter_dict["chapter_draft"] = {
-                "volume": chapter_dict.pop("volume"),
-                "chapter": chapter_dict.pop("chapter"),
-                "title": chapter_dict.pop("title"),
-                "translatedLanguage": chapter_dict.pop("language"),
+            ch_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
+            ch_dict["groups"] = [ch_dict.pop(f"group_{idx}_id") for idx in range(1, 6) if ch_dict[f"group_{idx}_id"]]
+            ch_dict["chapter_draft"] = {
+                "volume": ch_dict.pop("volume"),
+                "chapter": ch_dict.pop("chapter"),
+                "title": ch_dict.pop("title"),
+                "translatedLanguage": ch_dict.pop("language"),
             }
-            chapter_dicts.append(chapter_dict)
+            chapter_dicts.append(ch_dict)
         return chapter_dicts
 
     @threaded
     def update_preview(self):
-        scroll_position = self.ids["preview"].scroll_y
+        chapters = self.parse_chapters()
+        if len(chapters) == 0:
+            self.ids["preview"].text = "No files selected."
+            return
         preview_text = ""
-        for chapter in self.parse_chapters():
+        for chapter in chapters:
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
             for field in ["manga_id", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
+        # scroll position is saved so that the preview doesn't jump around every time you type
+        scroll_position = self.ids["preview"].scroll_y
         self.ids["preview"].text = preview_text
+        # some math is done to prevent staying overscrolled when the amount of lines has decreased
         max_scroll = max(self.ids["preview"].minimum_height - self.ids["preview"].height, 0)
         self.ids["preview"].scroll_y = min(scroll_position, max_scroll)
 
     @threaded
     def mass_upload(self):
         chapters = self.parse_chapters()
-        for idx, chapter in chapters:
-            self.manger.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
+        for idx, chapter in enumerate(chapters):
+            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
             try:
                 self.manager.md_api.upload_chapter(chapter)
             except Exception as exception:
-                self.manger.logger.error(exception)
-                self.manger.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
-        self.manger.logger.info(f"Done")
+                self.manager.logger.error(exception)
+                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
+        self.manager.logger.info(f"Done")
 
 
 class MassUploaderApp(App):
@@ -131,6 +142,7 @@ class MassUploaderApp(App):
         )
         handler.setFormatter(formatter)
         api_logger.addHandler(handler)
+        api_logger.setLevel("INFO")
         self.root.ids["manager"].logger = api_logger
         self.root.ids["manager"].md_api = MangaDexAPI()
 

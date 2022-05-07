@@ -5,7 +5,7 @@ description = "beat the frontend devs to the punch by providing a lower quality 
 authors = ["Xnot <xnot@outlook.com>"]
 
 [tool.poetry.dependencies]
-python = "=3.9"
+python = "3.9.*"
 requests = ">=2.25.1"
 Kivy = ">=2.0.0"
 plyer = ">=2.0.0"

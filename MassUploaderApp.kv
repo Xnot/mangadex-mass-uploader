@@ -8,7 +8,7 @@ GridLayout:
         MassUploaderScreen:
     TextInput:
         id: log_output
-        text: "mass_uploader.txt"
+        text: ""
         multiline: True
         readonly: True
         auto_indent: True
@@ -53,60 +53,70 @@ GridLayout:
 
             Label:
                 text: "manga_id:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: manga_id
                 multiline: True
 
             Label:
                 text: "volume:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: volume
                 multiline: True
 
             Label:
                 text: "chapter:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: chapter
                 multiline: True
 
             Label:
                 text: "title:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: title
                 multiline: True
 
             Label:
                 text: "language:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: language
                 multiline: True
 
             Label:
                 text: "group 1 id:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: group_1_id
                 multiline: True
 
             Label:
                 text: "group 2 id:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: group_2_id
                 multiline: True
 
             Label:
                 text: "group 3 id:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: group_3_id
                 multiline: True
 
             Label:
                 text: "group 4 id:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: group_4_id
                 multiline: True
 
             Label:
                 text: "group 5 id:"
+                size_hint_x: 0.25
             ChapterTextInput:
                 id: group_5_id
                 multiline: True
@@ -114,6 +124,7 @@ GridLayout:
             Button:
                 id: choose_files_button
                 text: "choose files"
+                size_hint_x: 0.25
                 on_release:
                     root.manager.get_screen("mass_uploader_screen").select_files()
 
@@ -125,7 +136,7 @@ GridLayout:
 
         TextInput:
             id: preview
-            text: "preview.txt"
+            text: "No files selected."
             multiline: True
             readonly: True
-            size_hint_x: 0.25
+            size_hint_x: 0.65
