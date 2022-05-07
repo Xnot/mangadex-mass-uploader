@@ -5,7 +5,8 @@ from itertools import zip_longest
 
 from kivy.config import Config
 
-Config.read("kivy_config.ini")
+Config.set("kivy", "desktop", 1)
+Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
 from kivy.uix.screenmanager import Screen
