@@ -138,6 +138,11 @@ class MassUploaderScreen(Screen):
                 self.manager.logger.error(exception)
                 self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
         self.manager.logger.info(f"Done")
+        self.toggle_upload_button()
+
+    @mainthread
+    def toggle_upload_button(self):
+        self.ids["mass_upload_button"].disabled = not self.ids["mass_upload_button"].disabled
 
 
 class MassUploaderApp(App):
