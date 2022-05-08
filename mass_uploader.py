@@ -79,11 +79,10 @@ class MassUploaderScreen(Screen):
         self.selected_files = natsorted(self.selected_files)
         self.update_preview()
 
-    @threaded
     def parse_chapters(self):
         chapter_count = len(self.selected_files)
         if not chapter_count:
-            return []
+            self.chapters = []
         chapters = {"file": self.selected_files}
         for field, element in self.ids.items():
             if not isinstance(element, ChapterTextInput):
@@ -119,7 +118,7 @@ class MassUploaderScreen(Screen):
     def update_preview(self):
         self.parse_chapters()
         if len(self.chapters) == 0:
-            self.ids["preview"].text = "No files selected."
+            self.set_preview("No files selected.")
             return
         preview_text = ""
         for chapter in self.chapters:
