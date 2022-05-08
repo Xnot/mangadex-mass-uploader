@@ -155,6 +155,15 @@ class MassUploaderScreen(Screen):
     def toggle_upload_button(self):
         self.ids["mass_upload_button"].disabled = not self.ids["mass_upload_button"].disabled
 
+    @mainthread
+    def clear_all_fields(self):
+        for _, element in self.ids.items():
+            if not isinstance(element, ChapterTextInput):
+                continue
+            element.text = ""
+        self.selected_files = []
+        self.update_preview()
+
 
 class MassUploaderApp(App):
     def build(self):

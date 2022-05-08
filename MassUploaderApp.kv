@@ -124,15 +124,22 @@ GridLayout:
                 multiline: True
 
             Button:
+                id: clear_all_button
+                text: "clear all"
+                size_hint_x: 0.25
+                on_release:
+                    root.manager.get_screen("mass_uploader_screen").clear_all_fields()
+
+            Button:
                 id: choose_files_button
                 text: "choose files"
-                size_hint_x: 0.25
                 on_release:
                     root.manager.get_screen("mass_uploader_screen").select_files()
 
             Button:
                 id: mass_upload_button
                 text: "upload"
+                size_hint_x: 0.25
                 on_release:
                     root.manager.get_screen("mass_uploader_screen").mass_upload()
 
