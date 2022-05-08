@@ -69,7 +69,7 @@ class MassUploaderScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_files = []
-        self.chapters = None
+        self.chapters = []
 
     @threaded
     def select_files(self):
