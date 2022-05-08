@@ -45,7 +45,11 @@ class LoginScreen(Screen):
         except HTTPError as exception:
             self.manager.logger.error(exception)
         else:
-            self.manager.current = "mass_uploader_screen"
+            self.set_uploader_screen()
+
+    @mainthread
+    def set_uploader_screen(self):
+        self.manager.current = "mass_uploader_screen"
 
 
 class ChapterTextInput(TextInput):
