@@ -78,7 +78,7 @@ class MangaDexAPI:
         self.send_request(
             "post",
             f"upload/{self.upload_session}/commit",
-            json={"chapter_draft": chapter_draft, "page_order": page_order},
+            json={"chapterDraft": chapter_draft, "pageOrder": page_order},
         )
 
     def upload_chapter(self, chapter: dict) -> None:

@@ -104,6 +104,7 @@ class MassUploaderScreen(Screen):
         chapter_dicts = []
         for chapter in zip_longest(*chapters.values()):
             ch_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
+            ch_dict["manga"] = ch_dict.pop("manga_id")
             ch_dict["groups"] = [ch_dict.pop(f"group_{idx}_id") for idx in range(1, 6) if ch_dict[f"group_{idx}_id"]]
             ch_dict["chapter_draft"] = {
                 "volume": ch_dict.pop("volume"),
@@ -123,7 +124,7 @@ class MassUploaderScreen(Screen):
         preview_text = ""
         for chapter in self.chapters:
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
-            for field in ["manga_id", "groups", "chapter_draft"]:
+            for field in ["manga", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
         self.set_preview(preview_text)
@@ -144,7 +145,7 @@ class MassUploaderScreen(Screen):
             self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
             try:
                 self.manager.md_api.upload_chapter(chapter)
-            except Exception as exception:
+            except HTTPError as exception:
                 self.manager.logger.error(exception)
                 self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
         self.manager.logger.info(f"Done")
