@@ -1,63 +1,91 @@
+import logging
+from time import time
+from typing import IO, Union
 from zipfile import ZipFile
 
 import requests
+from natsort import natsorted
 
 
 class MangaDexAPI:
-    endpoint = "https://api.mangadex.org"
+    API_URL = "https://api.mangadex.org"
 
     def __init__(self):
-        self.__refresh = None
-        self.__session = None
+        self.logger = self.logger = logging.getLogger("api_logger")
+        self._session_token = None
+        self._refresh_token = None
+        self._refresh_at = None
 
-    def login(self, username, password):
-        response = requests.post(f"{MangaDexAPI.endpoint}/auth/login",
-                                 json={"username": username, "password": password})
-        if not response.ok:
-            raise requests.HTTPError(f"MD API error - {response.status_code}: {response.reason}")
-        response = response.json()["token"]
-        self.__session = response["session"]
-        self.__refresh = response["refresh"]
-        # TODO actually use refresh token on expire
+    def login(self, username: str, password: str):
+        token = self.send_request(
+            "post",
+            "auth/login",
+            False,
+            json={"username": username, "password": password},
+        )
+        self._session_token = token["token"]["session"]
+        self._refresh_token = token["token"]["refresh"]
+        self._refresh_at = time() + 880
+        if self.upload_session:
+            self.logger.warning("You have an existing upload session. It will be deleted once uploading begins.")
 
-    def upload_chapter(self, chapter):
-        # delete any existing upload session
-        existing_session_resp = requests.get(f"{MangaDexAPI.endpoint}/upload/",
-                                             headers={"Authorization": f"Bearer {self.__session}"})
-        if existing_session_resp.ok:
-            session_id = existing_session_resp.json()["data"]["id"]
-            del_session_resp = requests.delete(f"{MangaDexAPI.endpoint}/upload/{session_id}",
-                                               headers={"Authorization": f"Bearer {self.__session}"})
-            if not del_session_resp.ok:
-                raise requests.HTTPError(f"MD API error - {del_session_resp.status_code}: {del_session_resp.reason}")
-        elif not existing_session_resp.status_code == 404:
-            raise requests.HTTPError(f"MD API error - {existing_session_resp.status_code}: {existing_session_resp.reason}")
+    def __del__(self):
+        self.send_request("post", "auth/logout")
 
-        # actual upload part
-        response = requests.post(f"{MangaDexAPI.endpoint}/upload/begin",
-                                 json={"groups": [group for group in chapter.groups if group is not None],
-                                       "manga": chapter.manga},
-                                 headers={"Authorization": f"Bearer {self.__session}"})
-        if not response.ok:
-            raise requests.HTTPError(f"MD API error - {response.status_code}: {response.reason}")
-        session_id = response.json()["data"]["id"]
-        page_ids = []
-        with ZipFile(chapter.file.name) as file:
-            for page in file.namelist():
-                if not page.endswith((".jpg", ".jpeg", ".png", ".gif")):
-                    continue
-                response = requests.post(f"{MangaDexAPI.endpoint}/upload/{session_id}",
-                                         files={"page": file.open(page)},
-                                         headers={"Authorization": f"Bearer {self.__session}"})
-                if not response.ok:
-                    raise requests.HTTPError(f"MD API error - {response.status_code}: {response.reason}")
-                page_ids.append(response.json()["data"][0]["id"])
-        response = requests.post(f"{MangaDexAPI.endpoint}/upload/{session_id}/commit",
-                                 json={"chapterDraft": {"volume": chapter.volume,
-                                                        "chapter": chapter.chapter,
-                                                        "title": chapter.title,
-                                                        "translatedLanguage": chapter.translatedLanguage},
-                                       "pageOrder": page_ids},
-                                 headers={"Authorization": f"Bearer {self.__session}"})
-        if not response.ok:
-            raise requests.HTTPError(f"MD API error - {response.status_code}: {response.reason}")
+    def send_request(
+        self,
+        method: str,
+        endpoint: str,
+        req_auth: bool = True,
+        suppress_error: bool = False,
+        **kwargs,
+    ) -> dict:
+        kwargs |= {"method": method, "url": f"{self.API_URL}/{endpoint}"}
+        if req_auth:
+            kwargs |= {"headers": {"Authorization": f"Bearer {self.session_token}"}}
+        response = requests.request(**kwargs).json()
+        if not suppress_error and response["result"] != "ok":
+            raise requests.HTTPError(f"I am not ok: {response['errors']}")
+        return response
+
+    @property
+    def session_token(self) -> str:
+        if time() > self._refresh_at:
+            response = self.send_request("post", "auth/refresh", False, json={"token": self._refresh_token})
+            self._session_token = response["token"]["session"]
+            self._refresh_at = time() + 880
+        return self._session_token
+
+    @property
+    def upload_session(self) -> Union[str, None]:
+        response = self.send_request("get", "upload", suppress_error=True)
+        if response["result"] == "ok":
+            return response["data"]["id"]
+
+    # TODO treat errors
+    def start_upload(self, manga: str, groups: list[str]) -> None:
+        if self.upload_session:
+            self.send_request("delete", f"upload/{self.upload_session}")
+        self.send_request("post", "upload/begin", json={"manga": manga, "groups": groups})
+
+    # TODO batch pages
+    # TODO treat errors
+    def upload_page(self, page: IO[bytes]) -> str:
+        response = self.send_request("post", f"upload/{self.upload_session}", files={"page": page})
+        return response["data"][0]["id"]
+
+    def commit_upload(self, chapter_draft: dict[str, str], page_order: list[str]) -> None:
+        self.send_request(
+            "post",
+            f"upload/{self.upload_session}/commit",
+            json={"chapterDraft": chapter_draft, "pageOrder": page_order},
+        )
+
+    def upload_chapter(self, chapter: dict) -> None:
+        self.start_upload(chapter["manga"], chapter["groups"])
+        with ZipFile(chapter["file"]) as file:
+            pages = [page for page in natsorted(file.namelist()) if page.endswith((".jpg", ".jpeg", ".png", ".gif"))]
+            page_order = []
+            for page in pages:
+                page_order.append(self.upload_page(file.open(page)))
+        self.commit_upload(chapter["chapter_draft"], page_order)

@@ -1,0 +1,159 @@
+GridLayout:
+    cols: 1
+    rows: 2
+
+    ScreenManager:
+        id: manager
+        LoginScreen:
+        MassUploaderScreen:
+    TextInput:
+        id: log_output
+        text: ""
+        font_name : "CONSOLA.ttf"
+        multiline: True
+        readonly: True
+        auto_indent: True
+        size_hint_y: 0.25
+
+<LoginScreen>:
+    name: "login_screen"
+
+    GridLayout:
+        cols: 2
+        rows: 3
+
+        Label:
+            text: "username:"
+
+        TextInput:
+            id: username
+            multiline: False
+
+        Label:
+            text: "password:"
+
+        TextInput:
+            id: password
+            multiline: False
+            password: True
+
+        Button:
+            id: login_button
+            text: "Login"
+            on_release:
+                root.manager.get_screen("login_screen").login()
+
+
+<MassUploaderScreen>:
+    name: "mass_uploader_screen"
+
+    GridLayout:
+        cols: 2
+
+        GridLayout:
+            cols: 4
+
+            Label:
+                text: "manga_id:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: manga_id
+                multiline: True
+
+            Label:
+                text: "volume:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: volume
+                multiline: True
+
+            Label:
+                text: "chapter:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: chapter
+                multiline: True
+
+            Label:
+                text: "title:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: title
+                multiline: True
+
+            Label:
+                text: "language:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: language
+                multiline: True
+
+            Label:
+                text: "group 1 id:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: group_1_id
+                multiline: True
+
+            Label:
+                text: "group 2 id:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: group_2_id
+                multiline: True
+
+            Label:
+                text: "group 3 id:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: group_3_id
+                multiline: True
+
+            Label:
+                text: "group 4 id:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: group_4_id
+                multiline: True
+
+            Label:
+                text: "group 5 id:"
+                size_hint_x: 0.25
+            ChapterTextInput:
+                id: group_5_id
+                multiline: True
+
+            Button:
+                id: clear_all_button
+                text: "clear all"
+                size_hint_x: 0.25
+                on_release:
+                    root.manager.get_screen("mass_uploader_screen").clear_all_fields()
+
+            Button:
+                id: choose_files_button
+                text: "choose files"
+                on_release:
+                    root.manager.get_screen("mass_uploader_screen").select_files()
+
+            Button:
+                id: mass_upload_button
+                text: "upload"
+                size_hint_x: 0.25
+                on_release:
+                    root.manager.get_screen("mass_uploader_screen").mass_upload()
+
+        TextInput:
+            id: preview
+            text:
+                """Choose files to upload with the 'choose files' button. Files must be .zip or .cbz.
+                Insert chapter names, volume numbers, chapter numbers, and group IDs into their respective fields. Each line is one chapter.
+                Inputting a single value will use that for all chapters. For chapter number, it'll increment by 1 for each chapter instead.
+                If you want a chapter to have an empty title or whatever, just skip a line.
+                A preview of the chapters will appear in this panel once files are selected.
+                The log panel at the bottom will tell you if you fucked up.
+                If there are any bugs or you want any features just make a PR so that I don't actually have to do more work.
+                """
+            multiline: True
+            readonly: True
+            size_hint_x: 0.65

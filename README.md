@@ -1,9 +1,23 @@
-# mangadex-mass-uploader
-imagine making userscripts
+# Mangadex Mass Uploader: Not A Userscript Edition
 
-1. install python
-2. install poetry
-3. poetry install
-4. poetry run python mass_uploader.py
+## Description
+This is a GUI tool to aid those who wish to farm 500 chapter uploads on [MangaDex](https://mangadex.org),
+but are not autistic enough to use the command line tools that other people have made.
+This will allow you to obtain the legendary `Power Uploader` role, 
+granting greater editing privileges on the website, 
+access to secret channels on the Discord server 
+where you can make connections with upper members of the scanlation cabal, 
+and the ability to flex on standard users.
+This script is only tested on Windows.
 
-_Should_ work exactly the same as the old userscript, except it's made with a meme UI lib I learned in 10 minutes and it's janky as fuck because I wanna go to sleep. Also you have to use the new manga/group UUIDs which is extra cancer. Good luck.
+## Installation
+### Windows
+1. Download and run the .exe from the releases page.
+### Linux
+1. Install python 3.9.
+2. Install poetry.
+3. I assume the average linux user knows how to clone this repo.
+4. `poetry install` in the repo folder.
+5. `poetry run python mass_uploader.py`
+###  Mac OS
+1. Follow the linux instructions and pray for the best.
