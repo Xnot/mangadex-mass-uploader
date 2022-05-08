@@ -10,7 +10,7 @@ a = Analysis(
     ['mass_uploader.py'],
     pathex=[],
     binaries=[],
-    datas=[("MassUploaderApp.kv", "."), ("mangadex_api.py", "."), ("CONSOLA.TTF", ".")],
+    datas=[("MassUploaderApp.kv", "."), ("mangadex_api.py", "."), ("CONSOLA.TTF", "."), ("mass_uploader.ico", ".")],
     hiddenimports=["plyer.platforms.win.filechooser"],
     hookspath=[],
     hooksconfig={},
@@ -43,4 +43,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon="mass_uploader.ico"
 )

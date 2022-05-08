@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import threading
 from itertools import zip_longest
 
@@ -10,6 +11,7 @@ Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
 from kivy.clock import mainthread
+from kivy.resources import resource_add_path
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from natsort import natsorted
@@ -167,6 +169,7 @@ class MassUploaderScreen(Screen):
 class MassUploaderApp(App):
     def build(self):
         super().build()
+        self.icon = "mass_uploader.ico"
         api_logger = logging.getLogger("api_logger")
         handler = APILogHandler(self.root.ids["log_output"])
         formatter = logging.Formatter(
@@ -181,4 +184,6 @@ class MassUploaderApp(App):
 
 
 if __name__ == "__main__":
+    if hasattr(sys, "_MEIPASS"):
+        resource_add_path(os.path.join(sys._MEIPASS))
     MassUploaderApp().run()
