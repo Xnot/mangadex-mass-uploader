@@ -9,6 +9,7 @@ Config.set("kivy", "desktop", 1)
 Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
+from kivy.clock import mainthread
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from natsort import natsorted
@@ -31,6 +32,7 @@ class APILogHandler(logging.Handler):
         super().__init__()
         self.output_panel = output_panel
 
+    @mainthread
     def emit(self, record: logging.LogRecord) -> None:
         self.output_panel.text += f"\n\n{self.format(record)}"
 
@@ -57,6 +59,7 @@ class MassUploaderScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_files = []
+        self.chapters = None
 
     @threaded
     def select_files(self):
@@ -66,6 +69,7 @@ class MassUploaderScreen(Screen):
         self.selected_files = natsorted(self.selected_files)
         self.update_preview()
 
+    @threaded
     def parse_chapters(self):
         chapter_count = len(self.selected_files)
         if not chapter_count:
@@ -98,20 +102,24 @@ class MassUploaderScreen(Screen):
                 "translatedLanguage": ch_dict.pop("language"),
             }
             chapter_dicts.append(ch_dict)
-        return chapter_dicts
+        self.chapters = chapter_dicts
 
     @threaded
     def update_preview(self):
-        chapters = self.parse_chapters()
-        if len(chapters) == 0:
+        self.parse_chapters()
+        if len(self.chapters) == 0:
             self.ids["preview"].text = "No files selected."
             return
         preview_text = ""
-        for chapter in chapters:
+        for chapter in self.chapters:
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
             for field in ["manga_id", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
+        self.set_preview(preview_text)
+
+    @mainthread
+    def set_preview(self, preview_text: str):
         # scroll position is saved so that the preview doesn't jump around every time you type
         scroll_position = self.ids["preview"].scroll_y
         self.ids["preview"].text = preview_text
@@ -121,14 +129,14 @@ class MassUploaderScreen(Screen):
 
     @threaded
     def mass_upload(self):
-        chapters = self.parse_chapters()
-        for idx, chapter in enumerate(chapters):
-            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
+        self.toggle_upload_button()
+        for idx, chapter in enumerate(self.chapters):
+            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
             try:
                 self.manager.md_api.upload_chapter(chapter)
             except Exception as exception:
                 self.manager.logger.error(exception)
-                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
+                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
         self.manager.logger.info(f"Done")
 
 
