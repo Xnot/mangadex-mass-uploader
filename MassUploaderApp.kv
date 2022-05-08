@@ -145,7 +145,15 @@ GridLayout:
 
         TextInput:
             id: preview
-            text: "No files selected."
+            text:
+                """Choose files to upload with the 'choose files' button. Files must be .zip or .cbz.
+                Insert chapter names, volume numbers, chapter numbers, and group IDs into their respective fields. Each line is one chapter.
+                Inputting a single value will use that for all chapters. For chapter number, it'll increment by 1 for each chapter instead.
+                If you want a chapter to have an empty title or whatever, just skip a line.
+                A preview of the chapters will appear in this panel once files are selected.
+                The log panel at the bottom will tell you if you fucked up.
+                If there are any bugs or you want any features just make a PR so that I don't actually have to do more work.
+                """
             multiline: True
             readonly: True
             size_hint_x: 0.65

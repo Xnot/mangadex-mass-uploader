@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mangadex-mass-uploader"
-version = "0.1.0"
-description = "beat the frontend devs to the punch by providing a lower quality user experience and excusing it with 'it's not official tho'"
+version = "1.0.0"
+description = "try to get green!"
 authors = ["Xnot <xnot@outlook.com>"]
 
 [tool.poetry.dependencies]
