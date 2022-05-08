@@ -10,7 +10,7 @@ a = Analysis(
     ['mass_uploader.py'],
     pathex=[],
     binaries=[],
-    datas=[("MassUploaderApp.kv", "."), ("mangadex_api.py", ".")],
+    datas=[("MassUploaderApp.kv", "."), ("mangadex_api.py", "."), ("CONSOLA.TTF", ".")],
     hiddenimports=["plyer.platforms.win.filechooser"],
     hookspath=[],
     hooksconfig={},

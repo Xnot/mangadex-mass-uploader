@@ -34,7 +34,7 @@ class APILogHandler(logging.Handler):
 
     @mainthread
     def emit(self, record: logging.LogRecord) -> None:
-        self.output_panel.text += f"\n\n{self.format(record)}"
+        self.output_panel.text += self.format(record)
 
 
 class LoginScreen(Screen):
@@ -162,7 +162,7 @@ class MassUploaderApp(App):
         api_logger = logging.getLogger("api_logger")
         handler = APILogHandler(self.root.ids["log_output"])
         formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)-7s [%(module)s.%(funcName)s.%(lineno)s]\n%(message)s",
+            "%(asctime)s - %(levelname)-7s | %(message)s | [%(module)s.%(funcName)s.%(lineno)s]\n",
             datefmt="%Y-%m-%dT%H:%M:%S",
         )
         handler.setFormatter(formatter)
