@@ -84,12 +84,12 @@ class MassUploaderScreen(Screen):
         if not chapter_count:
             self.chapters = []
         chapters = {"file": self.selected_files}
-        for field, element in self.ids.items():
+        for field_id, element in self.ids.items():
             if not isinstance(element, ChapterTextInput):
                 continue
             parsed_values = [value.strip() for value in element.text.split("\n")]
             # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
-            if len(parsed_values) == 1 and field == "chapter" and parsed_values[0].isdigit():
+            if len(parsed_values) == 1 and field_id == "chapter" and parsed_values[0].isdigit():
                 parsed_values = range(int(parsed_values[0]), int(parsed_values[0]) + chapter_count)
                 parsed_values = [str(value) for value in parsed_values]
             # for non-numerical chapter and other fields, single inputs are repeated
@@ -98,7 +98,7 @@ class MassUploaderScreen(Screen):
             # get rid of invalid/extra inputs
             parsed_values = [None if value == "" else value for value in parsed_values]
             parsed_values = parsed_values[:chapter_count]
-            chapters[field] = parsed_values
+            chapters[field_id] = parsed_values
         # transpose into [{"file": 1, "chapter": 1}, {"file": 2, "chapter": 2}]
         chapter_dicts = []
         for chapter in zip_longest(*chapters.values()):
