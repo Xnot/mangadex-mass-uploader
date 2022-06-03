@@ -1,7 +1,5 @@
-import logging
 import os
 import sys
-import threading
 from itertools import zip_longest
 
 from kivy.config import Config
@@ -19,24 +17,8 @@ from plyer import filechooser
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
+from utils import initialize_api_logger, threaded
 
-
-def threaded(fun: callable) -> callable:
-    def fun_threaded(*args, **kwargs):
-        sub_thread = threading.Thread(target=fun, args=args, kwargs=kwargs)
-        sub_thread.start()
-
-    return fun_threaded
-
-
-class APILogHandler(logging.Handler):
-    def __init__(self, output_panel: TextInput):
-        super().__init__()
-        self.output_panel = output_panel
-
-    @mainthread
-    def emit(self, record: logging.LogRecord) -> None:
-        self.output_panel.text += self.format(record)
 
 
 class LoginScreen(Screen):
@@ -170,16 +152,7 @@ class MassUploaderApp(App):
     def build(self):
         super().build()
         self.icon = "mass_uploader.ico"
-        api_logger = logging.getLogger("api_logger")
-        handler = APILogHandler(self.root.ids["log_output"])
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)-7s | %(message)s | [%(module)s.%(funcName)s.%(lineno)s]\n",
-            datefmt="%Y-%m-%dT%H:%M:%S",
-        )
-        handler.setFormatter(formatter)
-        api_logger.addHandler(handler)
-        api_logger.setLevel("INFO")
-        self.root.ids["manager"].logger = api_logger
+        self.root.ids["manager"].logger = initialize_api_logger(self.root.ids["log_output"])
         self.root.ids["manager"].md_api = MangaDexAPI()
 
 
