@@ -1,3 +1,5 @@
+#:include LoginScreen.kv
+
 GridLayout:
     cols: 1
     rows: 2
@@ -5,6 +7,7 @@ GridLayout:
     ScreenManager:
         id: manager
         LoginScreen:
+            screen_after_login: "mass_uploader_screen"
         MassUploaderScreen:
     TextInput:
         id: log_output
@@ -14,35 +17,6 @@ GridLayout:
         readonly: True
         auto_indent: True
         size_hint_y: 0.25
-
-<LoginScreen>:
-    name: "login_screen"
-
-    GridLayout:
-        cols: 2
-        rows: 3
-
-        Label:
-            text: "username:"
-
-        TextInput:
-            id: username
-            multiline: False
-
-        Label:
-            text: "password:"
-
-        TextInput:
-            id: password
-            multiline: False
-            password: True
-
-        Button:
-            id: login_button
-            text: "Login"
-            on_release:
-                root.manager.get_screen("login_screen").login()
-
 
 <MassUploaderScreen>:
     name: "mass_uploader_screen"

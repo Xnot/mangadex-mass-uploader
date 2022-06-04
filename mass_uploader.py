@@ -1,5 +1,4 @@
 import os
-import sys
 from itertools import zip_longest
 
 from kivy.config import Config
@@ -9,7 +8,6 @@ Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
 from kivy.clock import mainthread
-from kivy.resources import resource_add_path
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 from natsort import natsorted
@@ -17,29 +15,8 @@ from plyer import filechooser
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
-from utils import initialize_api_logger, threaded
+from utils import initialize_api_logger, start_app, threaded
 
-
-
-class LoginScreen(Screen):
-    @threaded
-    def login(self):
-        self.toggle_login_button()
-        try:
-            self.manager.md_api.login(self.ids["username"].text, self.ids["password"].text)
-        except HTTPError as exception:
-            self.manager.logger.error(exception)
-        else:
-            self.set_uploader_screen()
-        self.toggle_login_button()
-
-    @mainthread
-    def set_uploader_screen(self):
-        self.manager.current = "mass_uploader_screen"
-
-    @mainthread
-    def toggle_login_button(self):
-        self.ids["login_button"].disabled = not self.ids["login_button"].disabled
 
 
 class ChapterTextInput(TextInput):
@@ -157,6 +134,4 @@ class MassUploaderApp(App):
 
 
 if __name__ == "__main__":
-    if hasattr(sys, "_MEIPASS"):
-        resource_add_path(os.path.join(sys._MEIPASS))
-    MassUploaderApp().run()
+    start_app(MassUploaderApp())

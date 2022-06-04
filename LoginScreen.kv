@@ -1,0 +1,27 @@
+<LoginScreen>:
+    name: "login_screen"
+
+    GridLayout:
+        cols: 2
+        rows: 3
+
+        Label:
+            text: "username:"
+
+        TextInput:
+            id: username
+            multiline: False
+
+        Label:
+            text: "password:"
+
+        TextInput:
+            id: password
+            multiline: False
+            password: True
+
+        Button:
+            id: login_button
+            text: "Login"
+            on_release:
+                root.login()
