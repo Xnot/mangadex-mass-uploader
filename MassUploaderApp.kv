@@ -1,4 +1,7 @@
-#:include LoginScreen.kv
+#:include widgets/chapter_info_input.kv
+#:include widgets/log_output.kv
+#:include widgets/login_screen.kv
+
 
 GridLayout:
     cols: 1
@@ -6,17 +9,12 @@ GridLayout:
 
     ScreenManager:
         id: manager
+
         LoginScreen:
             screen_after_login: "mass_uploader_screen"
         MassUploaderScreen:
-    TextInput:
-        id: log_output
-        text: ""
-        font_name : "CONSOLA.ttf"
-        multiline: True
-        readonly: True
-        auto_indent: True
-        size_hint_y: 0.25
+            id: mass_uploader_screen
+    LogOutput:
 
 <MassUploaderScreen>:
     name: "mass_uploader_screen"
@@ -25,98 +23,71 @@ GridLayout:
         cols: 2
 
         GridLayout:
-            cols: 4
+            id: "input_container"
+            cols: 1
 
-            Label:
-                text: "manga_id:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: manga_id
-                multiline: True
+            GridLayout:
+                id: "chapter_input_container"
+                cols: 4
 
-            Label:
-                text: "volume:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: volume
-                multiline: True
+                ChapterInfoInput:
+                    id: manga_id
+                    label: "manga id"
+                ChapterInfoInput:
+                    id: volume
+                    label: "volume"
+                ChapterInfoInput:
+                    id: chapter
+                    label: "chapter"
+                ChapterInfoInput:
+                    id: title
+                    label: "title"
+                ChapterInfoInput:
+                    id: language
+                    label: "language"
+                ChapterInfoInput:
+                    id: group_1_id
+                    label: "group 1 id"
+                ChapterInfoInput:
+                    id: group_2_id
+                    label: "group 2 id"
+                ChapterInfoInput:
+                    id: group_3_id
+                    label: "group 3 id"
+                ChapterInfoInput:
+                    id: group_4_id
+                    label: "group 4 id"
+                ChapterInfoInput:
+                    id: group_5_id
+                    label: "group 5 id"
+            GridLayout:
+                id: "buttons_container"
+                cols: 3
+                size_hint_y: 0.15
+                padding: (20, 25)
+                spacing: (25, 0)
 
-            Label:
-                text: "chapter:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: chapter
-                multiline: True
-
-            Label:
-                text: "title:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: title
-                multiline: True
-
-            Label:
-                text: "language:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: language
-                multiline: True
-
-            Label:
-                text: "group 1 id:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: group_1_id
-                multiline: True
-
-            Label:
-                text: "group 2 id:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: group_2_id
-                multiline: True
-
-            Label:
-                text: "group 3 id:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: group_3_id
-                multiline: True
-
-            Label:
-                text: "group 4 id:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: group_4_id
-                multiline: True
-
-            Label:
-                text: "group 5 id:"
-                size_hint_x: 0.25
-            ChapterTextInput:
-                id: group_5_id
-                multiline: True
-
-            Button:
-                id: clear_all_button
-                text: "clear all"
-                size_hint_x: 0.25
-                on_release:
-                    root.manager.get_screen("mass_uploader_screen").clear_all_fields()
-
-            Button:
-                id: choose_files_button
-                text: "choose files"
-                on_release:
-                    root.manager.get_screen("mass_uploader_screen").select_files()
-
-            Button:
-                id: mass_upload_button
-                text: "upload"
-                size_hint_x: 0.25
-                on_release:
-                    root.manager.get_screen("mass_uploader_screen").mass_upload()
-
+                Button:
+                    id: clear_all_button
+                    text: "clear all"
+                    background_color: "#c1a257ff"
+                    background_normal: ""
+                    on_release:
+                        root.clear_all_fields()
+                Button:
+                    id: choose_files_button
+                    text: "choose files"
+                    background_color: "#998398ff"
+                    background_normal: ""
+                    on_release:
+                        root.select_files()
+                Button:
+                    id: mass_upload_button
+                    text: "upload"
+                    background_color: "#69c468ff"
+                    background_normal: ""
+                    on_release:
+                        root.mass_upload()
         TextInput:
             id: preview
             text:

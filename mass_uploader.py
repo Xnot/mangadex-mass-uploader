@@ -1,3 +1,4 @@
+import logging
 import os
 from itertools import zip_longest
 
@@ -9,21 +10,16 @@ Config.set("graphics", "window_state", "maximized")
 from kivy.app import App
 from kivy.clock import mainthread
 from kivy.uix.screenmanager import Screen
-from kivy.uix.textinput import TextInput
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
-from utils import initialize_api_logger, start_app, threaded
+from utils import start_app, threaded
+from widgets.chapter_info_input import ChapterInfoInput
+from widgets.log_output import LogOutput
+from widgets.login_screen import LoginScreen
 
-
-
-class ChapterTextInput(TextInput):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # kinda cancer but ok
-        self.bind(text=lambda *args: self.parent.parent.parent.update_preview())
 
 
 class MassUploaderScreen(Screen):
@@ -46,7 +42,7 @@ class MassUploaderScreen(Screen):
             self.chapters = []
         chapters = {"file": self.selected_files}
         for field_id, element in self.ids.items():
-            if not isinstance(element, ChapterTextInput):
+            if not isinstance(element, ChapterInfoInput):
                 continue
             parsed_values = [value.strip() for value in element.text.split("\n")]
             # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
@@ -118,7 +114,7 @@ class MassUploaderScreen(Screen):
     @mainthread
     def clear_all_fields(self):
         for _, element in self.ids.items():
-            if not isinstance(element, ChapterTextInput):
+            if not isinstance(element, ChapterInfoInput):
                 continue
             element.text = ""
         self.selected_files = []
@@ -129,7 +125,7 @@ class MassUploaderApp(App):
     def build(self):
         super().build()
         self.icon = "mass_uploader.ico"
-        self.root.ids["manager"].logger = initialize_api_logger(self.root.ids["log_output"])
+        self.root.ids["manager"].logger = logging.getLogger("api_logger")
         self.root.ids["manager"].md_api = MangaDexAPI()
 
 

@@ -1,0 +1,13 @@
+<ChapterInfoInput>
+    cols: 1
+    label: ""
+
+    Label:
+        id: label
+        text: f"{root.label}:"
+        text_size: self.size
+        size_hint_y: 0.15
+    TextInput:
+        id: input
+        multiline: True
+        on_text: app.root.ids["mass_uploader_screen"].update_preview()
