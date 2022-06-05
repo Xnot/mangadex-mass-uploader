@@ -8,7 +8,7 @@ Config.set("kivy", "desktop", 1)
 Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
-from kivy.clock import mainthread
+from kivy.clock import mainthread, Clock
 from kivy.uix.screenmanager import Screen
 from natsort import natsorted
 from plyer import filechooser
@@ -20,6 +20,24 @@ from widgets.chapter_info_input import ChapterInfoInput
 from widgets.log_output import LogOutput
 from widgets.login_screen import LoginScreen
 
+
+class UploaderInfoInput(ChapterInfoInput):
+    """
+    ChapterInfoInput, but it updates the preview panel whenever the text changes.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # the event listener is scheduled to be bound at the first render
+        # because kivy is dumb and can't access child nodes during init
+        Clock.schedule_once(
+            self.bind_preview_event,
+            0
+        )
+
+    def bind_preview_event(self, dt=0):
+        self.ids["input"].bind(
+            text=lambda *args: App.get_running_app().root.ids["mass_uploader_screen"].update_preview()
+        )
 
 
 class MassUploaderScreen(Screen):
