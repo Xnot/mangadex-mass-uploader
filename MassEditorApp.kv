@@ -1,0 +1,110 @@
+#:include widgets/chapter_info_input.kv
+#:include widgets/log_output.kv
+#:include widgets/login_screen.kv
+
+
+GridLayout:
+    cols: 1
+    rows: 2
+
+    ScreenManager:
+        id: manager
+
+        LoginScreen:
+            screen_after_login: "selector_screen"
+        SelectorScreen:
+            id: selector_screen
+        EditorScreen:
+            id: editor_screen
+    LogOutput:
+
+<SelectorScreen>:
+    name: "selector_screen"
+
+    GridLayout:
+        cols: 2
+
+        GridLayout:
+            id: "input_container"
+            cols: 1
+
+            GridLayout:
+                id: "chapter_input_container"
+                cols: 4
+
+                ChapterInfoInput:
+                    id: entity_id
+                    label: "entity id"
+                    multiline: False
+                ChapterInfoInput:
+                    id: manga_id
+                    label: "manga id"
+                ChapterInfoInput:
+                    id: volume
+                    label: "volume"
+                ChapterInfoInput:
+                    id: chapter
+                    label: "chapter"
+                ChapterInfoInput:
+                    id: title
+                    label: "title"
+                ChapterInfoInput:
+                    id: language
+                    label: "language"
+                ChapterInfoInput:
+                    id: group_1_id
+                    label: "group 1 id"
+                ChapterInfoInput:
+                    id: group_2_id
+                    label: "group 2 id"
+                ChapterInfoInput:
+                    id: group_3_id
+                    label: "group 3 id"
+                ChapterInfoInput:
+                    id: group_4_id
+                    label: "group 4 id"
+                ChapterInfoInput:
+                    id: group_5_id
+                    label: "group 5 id"
+            GridLayout:
+                id: "buttons_container"
+                cols: 3
+                size_hint_y: 0.15
+                padding: (20, 25)
+                spacing: (25, 0)
+
+                Button:
+                    id: clear_all_button
+                    text: "clear all"
+                    background_color: "#c1a257ff"
+                    background_normal: ""
+                    on_release:
+                        root.clear_all_fields()
+                Button:
+                    id: update_preview_button
+                    text: "update preview"
+                    background_color: "#998398ff"
+                    background_normal: ""
+                    on_release:
+                        root.update_preview()
+                Button:
+                    id: confirm_selection_button
+                    text: "confirm selection"
+                    background_color: "#69c468ff"
+                    background_normal: ""
+                    on_release:
+                        root.confirm_selection()
+        TextInput:
+            id: preview
+            text:
+                """Choose files to upload with the 'choose files' button. Files must be .zip or .cbz.
+                Insert chapter names, volume numbers, chapter numbers, and group IDs into their respective fields. Each line is one chapter.
+                Inputting a single value will use that for all chapters. For chapter number, it'll increment by 1 for each chapter instead.
+                If you want a chapter to have an empty title or whatever, just skip a line.
+                A preview of the chapters will appear in this panel once files are selected.
+                The log panel at the bottom will tell you if you fucked up.
+                If there are any bugs or you want any features just make a PR so that I don't actually have to do more work.
+                """
+            multiline: True
+            readonly: True
+            size_hint_x: 0.65
