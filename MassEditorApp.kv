@@ -30,42 +30,29 @@ GridLayout:
 
             GridLayout:
                 id: "chapter_input_container"
-                cols: 4
+                cols: 2
 
                 ChapterInfoInput:
-                    id: entity_id
-                    label: "entity id"
+                    id: manga
+                    label: "manga id"
                     multiline: False
                 ChapterInfoInput:
-                    id: manga_id
-                    label: "manga id"
+                    id: uploader
+                    label: "uploader id"
+                    multiline: False
                 ChapterInfoInput:
-                    id: volume
-                    label: "volume"
+                    id: groups[]
+                    label: "group ids"
                 ChapterInfoInput:
-                    id: chapter
+                    id: translatedLanguage[]
+                    label: "languages"
+                ChapterInfoInput:
+                    id: volume[]
+                    label: "volume numbers"
+                ChapterInfoInput:
+                    id: chapter numbers
                     label: "chapter"
-                ChapterInfoInput:
-                    id: title
-                    label: "title"
-                ChapterInfoInput:
-                    id: language
-                    label: "language"
-                ChapterInfoInput:
-                    id: group_1_id
-                    label: "group 1 id"
-                ChapterInfoInput:
-                    id: group_2_id
-                    label: "group 2 id"
-                ChapterInfoInput:
-                    id: group_3_id
-                    label: "group 3 id"
-                ChapterInfoInput:
-                    id: group_4_id
-                    label: "group 4 id"
-                ChapterInfoInput:
-                    id: group_5_id
-                    label: "group 5 id"
+
             GridLayout:
                 id: "buttons_container"
                 cols: 3
