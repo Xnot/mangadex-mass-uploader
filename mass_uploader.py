@@ -19,6 +19,7 @@ from utils import start_app, threaded
 from widgets.chapter_info_input import ChapterInfoInput
 from widgets.log_output import LogOutput
 from widgets.login_screen import LoginScreen
+from widgets.preview_output import PreviewOutput
 
 
 class UploaderInfoInput(ChapterInfoInput):
@@ -105,12 +106,7 @@ class MassUploaderScreen(Screen):
 
     @mainthread
     def set_preview(self, preview_text: str):
-        # scroll position is saved so that the preview doesn't jump around every time you type
-        scroll_position = self.ids["preview"].scroll_y
         self.ids["preview"].text = preview_text
-        # some math is done to prevent staying overscrolled when the amount of lines has decreased
-        max_scroll = max(self.ids["preview"].minimum_height - self.ids["preview"].height, 0)
-        self.ids["preview"].scroll_y = min(scroll_position, max_scroll)
 
     @threaded
     def mass_upload(self):
