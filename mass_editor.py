@@ -1,6 +1,7 @@
 import logging
 import os
 from itertools import zip_longest
+from typing import Union
 
 from kivy.config import Config
 
@@ -45,46 +46,52 @@ class SelectorScreen(Screen):
         super().__init__(**kwargs)
         self.selected_chapters = []
 
+    @staticmethod
+    def parse_filter(value: str) -> Union[None, set[Union[None, str]]]:
+        split_values = value.split("\n")
+        if len(split_values) == 1 and split_values[0] == "":
+            return None
+        split_values = [None if value == "" else value for value in split_values]
+        return set(split_values)
+
     def fetch_chapters(self):
-        chapters = {}
+        filters = {}
         for field_id, element in self.ids.items():
             if not isinstance(element, ChapterInfoInput):
                 continue
-            parsed_values = [value.strip() for value in element.text.split("\n")]
-            # get rid of invalid inputs
-            parsed_values = [None if value == "" else value for value in parsed_values]
-            parsed_values = parsed_values[:chapter_count]
-            chapters[field_id] = parsed_values
-        # transpose into [{"file": 1, "chapter": 1}, {"file": 2, "chapter": 2}]
+            filters[field_id] = self.parse_filter(element.text)
+        chapters = self.manager.md_api.get_chapter_list(filters)
+        # flatten dicts
         chapter_dicts = []
-        for chapter in zip_longest(*chapters.values()):
-            ch_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
-            ch_dict["manga"] = ch_dict.pop("manga_id")
-            ch_dict["groups"] = [ch_dict.pop(f"group_{idx}_id") for idx in range(1, 6) if ch_dict[f"group_{idx}_id"]]
-            ch_dict["chapter_draft"] = {
-                "volume": ch_dict.pop("volume"),
-                "chapter": ch_dict.pop("chapter"),
-                "title": ch_dict.pop("title"),
-                "translatedLanguage": ch_dict.pop("language"),
+        for chapter in chapters:
+            manga = [relation["id"] for relation in chapter["relationships"] if relation["type"] == "manga"][0]
+            groups = [relation["id"] for relation in chapter["relationships"] if relation["type"] == "scanlation_group"]
+            ch_dict = {
+                "id": chapter["id"],
+                "manga": manga,
+                "groups": groups,
+                "volume": chapter["attributes"]["volume"],
+                "chapter": chapter["attributes"]["chapter"],
+                "title": chapter["attributes"]["title"],
+                "translatedLanguage": chapter["attributes"]["translatedLanguage"],
+                "version": chapter["attributes"]["version"],
             }
             chapter_dicts.append(ch_dict)
         self.selected_chapters = chapter_dicts
 
-        self.manager.md_api.fetch(entity_id, filters)
-
     @threaded
     def update_preview(self):
+        self.toggle_button("update_preview_button")
         self.fetch_chapters()
-        if len(self.selected_chapters) == 0:
-            self.set_preview("No files selected.")
-            return
         preview_text = ""
-        for chapter in self.selected_chapters:
-            preview_text += f"file: {os.path.basename(chapter['file'])}\n"
-            for field in ["manga", "groups", "chapter_draft"]:
-                preview_text += f"{field}: {chapter[field]}\n"
-            preview_text += "\n"
+        for chapter in self.selected_chapters.copy():
+            for field in ["id", "manga", "groups"]:
+                preview_text += f"{field}: {chapter.pop(field)}\n"
+            preview_text += f"{chapter}\n\n"
+        if preview_text == "":
+            preview_text = "No chapters selected."
         self.set_preview(preview_text)
+        self.toggle_button("update_preview_button")
 
     @mainthread
     def set_preview(self, preview_text: str):
@@ -97,29 +104,23 @@ class SelectorScreen(Screen):
 
     @threaded
     def confirm_selection(self):
-        self.toggle_upload_button()
-        for idx, chapter in enumerate(self.selected_chapters):
-            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.selected_chapters)}")
-            try:
-                self.manager.md_api.upload_chapter(chapter)
-            except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.selected_chapters)}")
-        self.manager.logger.info(f"Done")
-        self.toggle_upload_button()
+        self.manager.current = "editor_screen"
+        self.manager.current_screen.selected_chapters = self.selected_chapters
 
     @mainthread
-    def toggle_upload_button(self):
-        self.ids["mass_upload_button"].disabled = not self.ids["mass_upload_button"].disabled
+    def toggle_button(self, button_id: str):
+        self.ids[button_id].disabled = not self.ids[button_id].disabled
 
     @mainthread
     def clear_all_fields(self):
+        self.toggle_button("clear_all_button")
         for _, element in self.ids.items():
             if not isinstance(element, ChapterInfoInput):
                 continue
             element.text = ""
         self.selected_chapters = []
         self.update_preview()
+        self.toggle_button("clear_all_button")
 
 
 class EditorScreen(Screen):
