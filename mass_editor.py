@@ -98,7 +98,7 @@ class SelectorScreen(Screen):
     def set_preview(self, preview_text: str):
         self.ids["preview"].text = preview_text
 
-    @threaded
+    @mainthread
     def confirm_selection(self):
         self.manager.current = "editor_screen"
         self.manager.current_screen.selected_chapters = self.selected_chapters
@@ -120,7 +120,13 @@ class SelectorScreen(Screen):
 
 
 class EditorScreen(Screen):
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.selected_chapters = []
+
+    @mainthread
+    def return_to_selector(self):
+        self.manager.current = "selector_screen"
 
 
 class MassEditorApp(App):
