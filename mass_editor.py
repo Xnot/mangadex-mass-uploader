@@ -135,6 +135,21 @@ class EditorScreen(AppScreen):
             preview_text = "No chapters selected."
         self.set_preview(preview_text)
 
+    @threaded
+    def mass_edit(self):
+        with self.toggle_button("mass_edit_button"):
+            for idx, (old_chapter, new_chapter) in enumerate(zip(self.selected_chapters, self.edited_chapters)):
+                if old_chapter == new_chapter:
+                    self.manager.logger.info(f"Skipping unchanged chapter {idx + 1}/{len(self.edited_chapters)}")
+                    continue
+                self.manager.logger.info(f"Editing chapter {idx + 1}/{len(self.edited_chapters)}")
+                try:
+                    self.manager.md_api.edit_chapter(new_chapter.copy())
+                except HTTPError as exception:
+                    self.manager.logger.error(exception)
+                    self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.edited_chapters)}")
+            self.manager.logger.info(f"Done")
+
 
 class MassEditorApp(App):
     def build(self):

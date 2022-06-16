@@ -62,14 +62,12 @@ class MangaDexAPI:
         if response["result"] == "ok":
             return response["data"]["id"]
 
-    # TODO treat errors
     def start_upload(self, manga: str, groups: list[str]) -> None:
         if self.upload_session:
             self.send_request("delete", f"upload/{self.upload_session}")
         self.send_request("post", "upload/begin", json={"manga": manga, "groups": groups})
 
     # TODO batch pages
-    # TODO treat errors
     def upload_page(self, page: IO[bytes]) -> str:
         response = self.send_request("post", f"upload/{self.upload_session}", files={"page": page})
         return response["data"][0]["id"]
@@ -113,3 +111,8 @@ class MangaDexAPI:
         if chapter_filter is not None:
             chapter_list = [chapter for chapter in chapter_list if chapter["attributes"]["chapter"] in chapter_filter]
         return chapter_list
+
+    def edit_chapter(self, chapter: dict) -> None:
+        chapter.pop("manga")
+        chapter_id = chapter.pop("id")
+        self.send_request("put", f"chapter/{chapter_id}", json=chapter)
