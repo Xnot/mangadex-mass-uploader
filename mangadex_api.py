@@ -62,14 +62,12 @@ class MangaDexAPI:
         if response["result"] == "ok":
             return response["data"]["id"]
 
-    # TODO treat errors
     def start_upload(self, manga: str, groups: list[str]) -> None:
         if self.upload_session:
             self.send_request("delete", f"upload/{self.upload_session}")
         self.send_request("post", "upload/begin", json={"manga": manga, "groups": groups})
 
     # TODO batch pages
-    # TODO treat errors
     def upload_page(self, page: IO[bytes]) -> str:
         response = self.send_request("post", f"upload/{self.upload_session}", files={"page": page})
         return response["data"][0]["id"]
@@ -89,3 +87,32 @@ class MangaDexAPI:
             for page in pages:
                 page_order.append(self.upload_page(file.open(page)))
         self.commit_upload(chapter["chapter_draft"], page_order)
+
+    def get_chapter_list(self, filters: dict) -> list[dict]:
+        # API gets mad if you request shit with no filters so just return nothing
+        if all(value is None for value in filters.values()):
+            return []
+        # some hardcoded params
+        filters["limit"] = 100
+        filters["offset"] = 0
+        filters["contentRating[]"] = ["safe", "suggestive", "erotica", "pornographic"]
+        # replace None with "none" for volumes
+        if filters["volume[]"] is not None:
+            filters["volume[]"] = ["none" if value is None else value for value in filters["volume[]"]]
+        # chapter number filter is done client-side since API only accepts 1 chapter
+        chapter_filter = filters.pop("chapter numbers")
+        response = self.send_request("get", "chapter", False, params=filters)
+        total_chapters = response["total"]
+        chapter_list = response["data"]
+        while len(chapter_list) < total_chapters:
+            filters["offset"] += 100
+            chapter_list.extend(self.send_request("get", "chapter", False, params=filters)["data"])
+        # apply chapter number filter
+        if chapter_filter is not None:
+            chapter_list = [chapter for chapter in chapter_list if chapter["attributes"]["chapter"] in chapter_filter]
+        return chapter_list
+
+    def edit_chapter(self, chapter: dict) -> None:
+        chapter.pop("manga")
+        chapter_id = chapter.pop("id")
+        self.send_request("put", f"chapter/{chapter_id}", json=chapter)

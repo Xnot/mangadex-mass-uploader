@@ -1,0 +1,162 @@
+#:include widgets/chapter_info_input.kv
+#:include widgets/log_output.kv
+#:include widgets/login_screen.kv
+#:include widgets/preview_output.kv
+
+
+GridLayout:
+    cols: 1
+    rows: 2
+
+    ScreenManager:
+        id: manager
+
+        LoginScreen:
+            screen_after_login: "selector_screen"
+        SelectorScreen:
+            id: selector_screen
+        EditorScreen:
+            id: editor_screen
+    LogOutput:
+
+<SelectorScreen>:
+    name: "selector_screen"
+
+    GridLayout:
+        cols: 2
+
+        GridLayout:
+            id: "input_container"
+            cols: 1
+
+            GridLayout:
+                id: "chapter_input_container"
+                cols: 2
+
+                ChapterInfoInput:
+                    id: manga
+                    label: "manga id"
+                    multiline: False
+                ChapterInfoInput:
+                    id: uploader
+                    label: "uploader id"
+                    multiline: False
+                ChapterInfoInput:
+                    id: groups[]
+                    label: "group ids"
+                ChapterInfoInput:
+                    id: translatedLanguage[]
+                    label: "languages"
+                ChapterInfoInput:
+                    id: volume[]
+                    label: "volume numbers"
+                ChapterInfoInput:
+                    id: chapter numbers
+                    label: "chapter"
+            GridLayout:
+                id: "buttons_container"
+                cols: 3
+                size_hint_y: 0.15
+                padding: (20, 25)
+                spacing: (25, 0)
+
+                Button:
+                    id: clear_all_button
+                    text: "clear all"
+                    background_color: "#c1a257ff"
+                    background_normal: ""
+                    on_release:
+                        root.clear_all_fields()
+                Button:
+                    id: update_preview_button
+                    text: "update preview"
+                    background_color: "#998398ff"
+                    background_normal: ""
+                    on_release:
+                        root.update_preview()
+                Button:
+                    id: confirm_selection_button
+                    text: "confirm selection"
+                    background_color: "#69c468ff"
+                    background_normal: ""
+                    on_release:
+                        root.confirm_selection()
+        PreviewOutput:
+            id: preview
+            initial_text:
+                """Choose chapters to edit using the filters in this screen.
+                Manga and uploader can only take 1 input, the others are 1 per line.
+                Filters left empty will not be used. To filter by NULL volumes, leave an extra empty line.
+                Use the preview button to see what the current filters are selecting.
+                Confirm the selection to go to the editing screen.
+                On the editing screen, each line will edit each chapter in order. Empty lines will be skipped. If you want to erase a value, use a space.
+                Entering a single line will use that value for all selected chapters. If you want to avoid that, leave an extra empty line.
+                Multiple groups can be added to a single chapter by comma-separating them."""
+
+<EditorScreen>:
+    name: "editor_screen"
+
+    GridLayout:
+        cols: 2
+
+        GridLayout:
+            id: "input_container"
+            cols: 1
+
+            GridLayout:
+                id: "chapter_input_container"
+                cols: 2
+
+                EditorInfoInput:
+                    id: volume
+                    label: "volume numbers"
+                EditorInfoInput:
+                    id: chapter
+                    label: "chapter numbers"
+                EditorInfoInput:
+                    id: title
+                    label: "chapter titles"
+                EditorInfoInput:
+                    id: translatedLanguage
+                    label: "languages"
+                EditorInfoInput:
+                    id: groups
+                    label: "group ids"
+            GridLayout:
+                id: "buttons_container"
+                cols: 4
+                size_hint_y: 0.15
+                padding: (20, 25)
+                spacing: (20, 0)
+
+                Button:
+                    id: return_to_selector_button
+                    text: "return to selection"
+                    background_color: "#9E5562ff"
+                    background_normal: ""
+                    on_release:
+                        root.return_to_selector()
+                Button:
+                    id: clear_all_button
+                    text: "clear all"
+                    background_color: "#c1a257ff"
+                    background_normal: ""
+                    on_release:
+                        root.clear_all_fields()
+                Button:
+                    id: mass_delete_button
+                    text: "delete"
+                    background_color: "#ff4545ff"
+                    background_normal: ""
+                    disabled: True
+                    on_release:
+                        root.mass_delete()
+                Button:
+                    id: mass_edit_button
+                    text: "edit"
+                    background_color: "#69c468ff"
+                    background_normal: ""
+                    on_release:
+                        root.mass_edit()
+        PreviewOutput:
+            id: preview

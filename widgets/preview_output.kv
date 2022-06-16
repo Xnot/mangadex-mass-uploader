@@ -1,0 +1,16 @@
+<PreviewOutput>:
+    bar_width: 20
+    effect_cls: "ScrollEffect"
+    scroll_type: ["bars"]
+    size_hint_x: 0.65
+    on_pos: self.pos = tuple(map(int, args[1]))
+    initial_text: ""
+
+    TextInput:
+        id: preview_text
+        text: root.initial_text
+        multiline: True
+        readonly: True
+        size_hint_x: 1
+        size_hint_y: None
+        height: self.minimum_height

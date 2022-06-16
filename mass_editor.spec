@@ -7,11 +7,11 @@ block_cipher = None
 
 
 a = Analysis(
-    ['mass_uploader.py'],
+    ['mass_editor.py'],
     pathex=[],
     binaries=[],
     datas=[
-        ("MassUploaderApp.kv", "."),
+        ("MassEditorApp.kv", "."),
         ("mangadex_api.py", "."),
         ("CONSOLA.TTF", "."),
         ("widgets/app_screen.py", "."),
@@ -43,7 +43,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     *[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
-    name='mass_uploader',
+    name='mass_editor',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -56,5 +56,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon="mass_uploader.ico"
+    icon="mass_editor.ico"
 )

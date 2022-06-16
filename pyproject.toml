@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mangadex-mass-uploader"
-version = "1.0.0"
+version = "2.0.0"
 description = "try to get green!"
 authors = ["Xnot <xnot@outlook.com>"]
 

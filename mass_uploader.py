@@ -1,7 +1,5 @@
 import logging
 import os
-import sys
-import threading
 from itertools import zip_longest
 
 from kivy.config import Config
@@ -10,68 +8,31 @@ Config.set("kivy", "desktop", 1)
 Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
-from kivy.clock import mainthread
-from kivy.resources import resource_add_path
-from kivy.uix.screenmanager import Screen
-from kivy.uix.textinput import TextInput
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
+from utils import start_app, threaded
+from widgets.app_screen import AppScreen
+from widgets.chapter_info_input import ReactiveInfoInput
+from widgets.log_output import LogOutput
+from widgets.login_screen import LoginScreen
+from widgets.preview_output import PreviewOutput
 
 
-def threaded(fun: callable) -> callable:
-    def fun_threaded(*args, **kwargs):
-        sub_thread = threading.Thread(target=fun, args=args, kwargs=kwargs)
-        sub_thread.start()
-
-    return fun_threaded
+class UploaderInfoInput(ReactiveInfoInput):
+    target_screen = "mass_uploader_screen"
 
 
-class APILogHandler(logging.Handler):
-    def __init__(self, output_panel: TextInput):
-        super().__init__()
-        self.output_panel = output_panel
-
-    @mainthread
-    def emit(self, record: logging.LogRecord) -> None:
-        self.output_panel.text += self.format(record)
-
-
-class LoginScreen(Screen):
-    @threaded
-    def login(self):
-        self.toggle_login_button()
-        try:
-            self.manager.md_api.login(self.ids["username"].text, self.ids["password"].text)
-        except HTTPError as exception:
-            self.manager.logger.error(exception)
-        else:
-            self.set_uploader_screen()
-        self.toggle_login_button()
-
-    @mainthread
-    def set_uploader_screen(self):
-        self.manager.current = "mass_uploader_screen"
-
-    @mainthread
-    def toggle_login_button(self):
-        self.ids["login_button"].disabled = not self.ids["login_button"].disabled
-
-
-class ChapterTextInput(TextInput):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # kinda cancer but ok
-        self.bind(text=lambda *args: self.parent.parent.parent.update_preview())
-
-
-class MassUploaderScreen(Screen):
+class MassUploaderScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_files = []
         self.chapters = []
+
+    def clear_inputs(self):
+        self.selected_files = []
 
     @threaded
     def select_files(self):
@@ -86,9 +47,7 @@ class MassUploaderScreen(Screen):
         if not chapter_count:
             self.chapters = []
         chapters = {"file": self.selected_files}
-        for field_id, element in self.ids.items():
-            if not isinstance(element, ChapterTextInput):
-                continue
+        for field_id, element in self.iter_info_inputs():
             parsed_values = [value.strip() for value in element.text.split("\n")]
             # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
             if len(parsed_values) == 1 and field_id == "chapter" and parsed_values[0].isdigit():
@@ -119,71 +78,36 @@ class MassUploaderScreen(Screen):
     @threaded
     def update_preview(self):
         self.parse_chapters()
-        if len(self.chapters) == 0:
-            self.set_preview("No files selected.")
-            return
         preview_text = ""
         for chapter in self.chapters:
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
             for field in ["manga", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
+        if preview_text == "":
+            preview_text = "No chapters selected."
         self.set_preview(preview_text)
-
-    @mainthread
-    def set_preview(self, preview_text: str):
-        # scroll position is saved so that the preview doesn't jump around every time you type
-        scroll_position = self.ids["preview"].scroll_y
-        self.ids["preview"].text = preview_text
-        # some math is done to prevent staying overscrolled when the amount of lines has decreased
-        max_scroll = max(self.ids["preview"].minimum_height - self.ids["preview"].height, 0)
-        self.ids["preview"].scroll_y = min(scroll_position, max_scroll)
 
     @threaded
     def mass_upload(self):
-        self.toggle_upload_button()
-        for idx, chapter in enumerate(self.chapters):
-            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
-            try:
-                self.manager.md_api.upload_chapter(chapter)
-            except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
-        self.manager.logger.info(f"Done")
-        self.toggle_upload_button()
-
-    @mainthread
-    def toggle_upload_button(self):
-        self.ids["mass_upload_button"].disabled = not self.ids["mass_upload_button"].disabled
-
-    @mainthread
-    def clear_all_fields(self):
-        for _, element in self.ids.items():
-            if not isinstance(element, ChapterTextInput):
-                continue
-            element.text = ""
-        self.selected_files = []
-        self.update_preview()
+        with self.toggle_button("mass_upload_button"):
+            for idx, chapter in enumerate(self.chapters):
+                self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
+                try:
+                    self.manager.md_api.upload_chapter(chapter)
+                except HTTPError as exception:
+                    self.manager.logger.error(exception)
+                    self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
+            self.manager.logger.info(f"Done")
 
 
 class MassUploaderApp(App):
     def build(self):
         super().build()
         self.icon = "mass_uploader.ico"
-        api_logger = logging.getLogger("api_logger")
-        handler = APILogHandler(self.root.ids["log_output"])
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)-7s | %(message)s | [%(module)s.%(funcName)s.%(lineno)s]\n",
-            datefmt="%Y-%m-%dT%H:%M:%S",
-        )
-        handler.setFormatter(formatter)
-        api_logger.addHandler(handler)
-        api_logger.setLevel("INFO")
-        self.root.ids["manager"].logger = api_logger
+        self.root.ids["manager"].logger = logging.getLogger("api_logger")
         self.root.ids["manager"].md_api = MangaDexAPI()
 
 
 if __name__ == "__main__":
-    if hasattr(sys, "_MEIPASS"):
-        resource_add_path(os.path.join(sys._MEIPASS))
-    MassUploaderApp().run()
+    start_app(MassUploaderApp())
