@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
-from kivy.uix.screenmanager import Screen
 from kivy.clock import mainthread
+from kivy.uix.screenmanager import Screen
 
 from widgets.chapter_info_input import ChapterInfoInput
 
