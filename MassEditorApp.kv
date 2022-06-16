@@ -83,6 +83,15 @@ GridLayout:
                         root.confirm_selection()
         PreviewOutput:
             id: preview
+            initial_text:
+                """Choose chapters to edit using the filters in this screen.
+                Manga and uploader can only take 1 input, the others are 1 per line.
+                Filters left empty will not be used. To filter by NULL volumes, leave an extra empty line.
+                Use the preview button to see what the current filters are selecting.
+                Confirm the selection to go to the editing screen.
+                On the editing screen, each line will edit each chapter in order. Empty lines will be skipped. If you want to erase a value, use a space.
+                Entering a single line will use that value for all selected chapters. If you want to avoid that, leave an extra empty line.
+                Multiple groups can be added to a single chapter by comma-separating them."""
 
 <EditorScreen>:
     name: "editor_screen"
