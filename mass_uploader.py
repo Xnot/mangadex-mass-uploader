@@ -8,14 +8,13 @@ Config.set("kivy", "desktop", 1)
 Config.set("graphics", "window_state", "maximized")
 
 from kivy.app import App
-from kivy.clock import mainthread, Clock
-from kivy.uix.screenmanager import Screen
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
 from utils import start_app, threaded
+from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
 from widgets.log_output import LogOutput
 from widgets.login_screen import LoginScreen
@@ -26,11 +25,14 @@ class UploaderInfoInput(ReactiveInfoInput):
     target_screen = "mass_uploader_screen"
 
 
-class MassUploaderScreen(Screen):
+class MassUploaderScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_files = []
         self.chapters = []
+
+    def clear_inputs(self):
+        self.selected_files = []
 
     @threaded
     def select_files(self):
@@ -45,9 +47,7 @@ class MassUploaderScreen(Screen):
         if not chapter_count:
             self.chapters = []
         chapters = {"file": self.selected_files}
-        for field_id, element in self.ids.items():
-            if not isinstance(element, ChapterInfoInput):
-                continue
+        for field_id, element in self.iter_info_inputs():
             parsed_values = [value.strip() for value in element.text.split("\n")]
             # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
             if len(parsed_values) == 1 and field_id == "chapter" and parsed_values[0].isdigit():
@@ -78,46 +78,27 @@ class MassUploaderScreen(Screen):
     @threaded
     def update_preview(self):
         self.parse_chapters()
-        if len(self.chapters) == 0:
-            self.set_preview("No files selected.")
-            return
         preview_text = ""
         for chapter in self.chapters:
             preview_text += f"file: {os.path.basename(chapter['file'])}\n"
             for field in ["manga", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
+        if preview_text == "":
+            preview_text = "No chapters selected."
         self.set_preview(preview_text)
-
-    @mainthread
-    def set_preview(self, preview_text: str):
-        self.ids["preview"].text = preview_text
 
     @threaded
     def mass_upload(self):
-        self.toggle_upload_button()
-        for idx, chapter in enumerate(self.chapters):
-            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
-            try:
-                self.manager.md_api.upload_chapter(chapter)
-            except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
-        self.manager.logger.info(f"Done")
-        self.toggle_upload_button()
-
-    @mainthread
-    def toggle_upload_button(self):
-        self.ids["mass_upload_button"].disabled = not self.ids["mass_upload_button"].disabled
-
-    @mainthread
-    def clear_all_fields(self):
-        for _, element in self.ids.items():
-            if not isinstance(element, ChapterInfoInput):
-                continue
-            element.text = ""
-        self.selected_files = []
-        self.update_preview()
+        with self.toggle_button("mass_upload_button"):
+            for idx, chapter in enumerate(self.chapters):
+                self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
+                try:
+                    self.manager.md_api.upload_chapter(chapter)
+                except HTTPError as exception:
+                    self.manager.logger.error(exception)
+                    self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
+            self.manager.logger.info(f"Done")
 
 
 class MassUploaderApp(App):
