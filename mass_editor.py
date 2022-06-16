@@ -116,10 +116,15 @@ class EditorScreen(AppScreen):
             chapter = chapter.copy()
             for field in edited_values:
                 new_value = edited_values[field].pop(0)
-                if new_value == " ":
+                if new_value in ["", [""]]:
+                    continue
+                if new_value in [" ", [" "]]:
                     new_value = None
-                if new_value not in ["", [""]]:
-                    chapter[field] = new_value
+                elif isinstance(new_value, list):
+                    new_value = [value.strip() for value in new_value]
+                else:
+                    new_value = new_value.strip()
+                chapter[field] = new_value
             self.edited_chapters.append(chapter)
 
     @threaded
