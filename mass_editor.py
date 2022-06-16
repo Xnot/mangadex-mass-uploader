@@ -155,7 +155,7 @@ class EditorScreen(Screen):
                 new_value = edited_values[field].pop(0)
                 if new_value == " ":
                     new_value = None
-                if new_value != "":
+                if new_value not in ["", [""]]:
                     chapter[field] = new_value
             self.edited_chapters.append(chapter)
 
