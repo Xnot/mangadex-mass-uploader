@@ -16,29 +16,14 @@ from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
 from utils import start_app, threaded
-from widgets.chapter_info_input import ChapterInfoInput
+from widgets.chapter_info_input import ReactiveInfoInput
 from widgets.log_output import LogOutput
 from widgets.login_screen import LoginScreen
 from widgets.preview_output import PreviewOutput
 
 
-class UploaderInfoInput(ChapterInfoInput):
-    """
-    ChapterInfoInput, but it updates the preview panel whenever the text changes.
-    """
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # the event listener is scheduled to be bound at the first render
-        # because kivy is dumb and can't access child nodes during init
-        Clock.schedule_once(
-            self.bind_preview_event,
-            0
-        )
-
-    def bind_preview_event(self, dt=0):
-        self.ids["input"].bind(
-            text=lambda *args: App.get_running_app().root.ids["mass_uploader_screen"].update_preview()
-        )
+class UploaderInfoInput(ReactiveInfoInput):
+    target_screen = "mass_uploader_screen"
 
 
 class MassUploaderScreen(Screen):
