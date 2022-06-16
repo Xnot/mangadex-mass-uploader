@@ -85,7 +85,8 @@ class SelectorScreen(Screen):
         self.toggle_button("update_preview_button")
         self.fetch_chapters()
         preview_text = ""
-        for chapter in self.selected_chapters.copy():
+        for chapter in self.selected_chapters:
+            chapter = chapter.copy()
             for field in ["id", "manga", "groups"]:
                 preview_text += f"{field}: {chapter.pop(field)}\n"
             preview_text += f"{chapter}\n\n"
