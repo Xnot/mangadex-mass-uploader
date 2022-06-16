@@ -101,8 +101,10 @@ class SelectorScreen(Screen):
 
     @mainthread
     def confirm_selection(self):
+        self.fetch_chapters()
         self.manager.current = "editor_screen"
         self.manager.current_screen.selected_chapters = self.selected_chapters
+        self.manager.current_screen.update_preview()
 
     @mainthread
     def toggle_button(self, button_id: str):
@@ -124,10 +126,70 @@ class EditorScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_chapters = []
+        self.edited_chapters = []
 
     @mainthread
     def return_to_selector(self):
         self.manager.current = "selector_screen"
+
+    def parse_edits(self):
+        chapter_count = len(self.selected_chapters)
+        edited_values = {}
+        for field_id, element in self.ids.items():
+            if not isinstance(element, ChapterInfoInput):
+                continue
+            parsed_values = element.text.split("\n")
+            # groups are comma-separated
+            if field_id == "groups":
+                parsed_values = [value.split(",") for value in parsed_values]
+            # single inputs are repeated
+            if len(parsed_values) == 1:
+                parsed_values = parsed_values * chapter_count
+            # pad inputs to chapter_count
+            parsed_values += [""] * (chapter_count - len(parsed_values))
+            edited_values[field_id] = parsed_values
+        self.edited_chapters = []
+        for chapter in self.selected_chapters:
+            chapter = chapter.copy()
+            for field in edited_values:
+                new_value = edited_values[field].pop(0)
+                if new_value == " ":
+                    new_value = None
+                if new_value != "":
+                    chapter[field] = new_value
+            self.edited_chapters.append(chapter)
+
+    @threaded
+    def update_preview(self):
+        self.parse_edits()
+        preview_text = ""
+        for chapter in self.edited_chapters:
+            chapter = chapter.copy()
+            for field in ["id", "manga", "groups"]:
+                preview_text += f"{field}: {chapter.pop(field)}\n"
+            preview_text += f"{chapter}\n\n"
+        if preview_text == "":
+            preview_text = "No chapters selected."
+        self.set_preview(preview_text)
+
+    @mainthread
+    def set_preview(self, preview_text: str):
+        self.ids["preview"].text = preview_text
+
+    @mainthread
+    def clear_all_fields(self):
+        self.toggle_button("clear_all_button")
+        for _, element in self.ids.items():
+            if not isinstance(element, ChapterInfoInput):
+                continue
+            element.text = ""
+        self.selected_chapters = []
+        self.update_preview()
+        self.toggle_button("clear_all_button")
+
+    @mainthread
+    def toggle_button(self, button_id: str):
+        self.ids[button_id].disabled = not self.ids[button_id].disabled
 
 
 class MassEditorApp(App):
