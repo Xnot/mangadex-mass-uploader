@@ -43,7 +43,12 @@ class SelectorScreen(AppScreen):
         filters = {}
         for field_id, element in self.iter_info_inputs():
             filters[field_id] = self.parse_filter(element.text)
-        chapters = self.manager.md_api.get_chapter_list(filters)
+        try:
+            chapters = self.manager.md_api.get_chapter_list(filters)
+        except HTTPError as exception:
+            self.manager.logger.error(exception)
+            self.manager.logger.error(f"Could not get chapters from the API")
+            chapters = []
         # flatten dicts
         chapter_dicts = []
         for chapter in chapters:
