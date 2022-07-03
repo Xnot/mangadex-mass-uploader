@@ -7,7 +7,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['mass_editor.py'],
+    ["mass_editor.py"],
     pathex=[],
     binaries=[],
     datas=[
@@ -43,7 +43,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     *[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
-    name='mass_editor',
+    name="mass_editor",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

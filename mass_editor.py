@@ -1,4 +1,6 @@
+import functools
 import logging
+import re
 from typing import Union
 
 from kivy.config import Config
@@ -39,10 +41,37 @@ class SelectorScreen(AppScreen):
         split_values = [None if value == "" else value for value in split_values]
         return set(split_values)
 
+    @staticmethod
+    def is_in_range(start: float, end: float, chapter: Union[None, str]) -> bool:
+        if chapter is None:
+            return False
+        # only consider numerical portion at start of string
+        chapter_number = re.match(r"[0-9]+(\.[0-9]+)?", chapter)
+        if chapter_number is None:
+            return False
+        return start <= float(chapter_number[0]) <= end
+
+    @staticmethod
+    def parse_range_filters(
+        filter_set: Union[None, set[Union[None, str]]]
+    ) -> Union[None, dict[str, set[Union[None, str, callable]]]]:
+        if filter_set is None:
+            return None
+        normal_filters = set()
+        range_filters = set()
+        for entry in filter_set:
+            try:
+                start, end = sorted(float(endpoint) for endpoint in entry.split("-"))
+                range_filters |= {functools.partial(SelectorScreen.is_in_range, start, end)}
+            except (ValueError, AttributeError):
+                normal_filters |= {entry}
+        return {"normal_filters": normal_filters, "range_filters": range_filters}
+
     def fetch_chapters(self):
         filters = {}
         for field_id, element in self.iter_info_inputs():
             filters[field_id] = self.parse_filter(element.text)
+        filters["chapter numbers"] = self.parse_range_filters(filters["chapter numbers"])
         try:
             chapters = self.manager.md_api.get_chapter_list(filters)
         except HTTPError as exception:

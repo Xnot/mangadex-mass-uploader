@@ -109,7 +109,16 @@ class MangaDexAPI:
             chapter_list.extend(self.send_request("get", "chapter", False, params=filters)["data"])
         # apply chapter number filter
         if chapter_filter is not None:
-            chapter_list = [chapter for chapter in chapter_list if chapter["attributes"]["chapter"] in chapter_filter]
+            chapter_list_filtered = []
+            for chapter in chapter_list:
+                if chapter["attributes"]["chapter"] in chapter_filter["normal_filters"]:
+                    chapter_list_filtered.append(chapter)
+                    continue
+                for range_check in chapter_filter["range_filters"]:
+                    if range_check(chapter["attributes"]["chapter"]):
+                        chapter_list_filtered.append(chapter)
+                        break
+            chapter_list = chapter_list_filtered
         return chapter_list
 
     def edit_chapter(self, chapter: dict) -> None:

@@ -7,7 +7,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['mass_uploader.py'],
+    ["mass_uploader.py"],
     pathex=[],
     binaries=[],
     datas=[
@@ -43,7 +43,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     *[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
-    name='mass_uploader',
+    name="mass_uploader",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
