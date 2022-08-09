@@ -125,3 +125,6 @@ class MangaDexAPI:
         chapter.pop("manga")
         chapter_id = chapter.pop("id")
         self.send_request("put", f"chapter/{chapter_id}", json=chapter)
+
+    def delete_chapter(self, chapter_id: str) -> None:
+        self.send_request("delete", f"chapter/{chapter_id}")

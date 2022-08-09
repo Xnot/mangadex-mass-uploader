@@ -91,13 +91,14 @@ class MassUploaderScreen(AppScreen):
     @threaded
     def mass_upload(self):
         with self.toggle_button("mass_upload_button"):
-            for idx, chapter in enumerate(self.chapters):
-                self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(self.chapters)}")
+            chapters = self.chapters.copy()
+            for idx, chapter in enumerate(chapters):
+                self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
                 try:
                     self.manager.md_api.upload_chapter(chapter)
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
-                    self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(self.chapters)}")
+                    self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
             self.manager.logger.info(f"Done")
 
 
