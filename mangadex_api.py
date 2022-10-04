@@ -1,5 +1,5 @@
 import logging
-from time import time
+from time import time, sleep
 from typing import IO, Union
 from zipfile import ZipFile
 
@@ -43,10 +43,14 @@ class MangaDexAPI:
         kwargs |= {"method": method, "url": f"{self.API_URL}/{endpoint}"}
         if req_auth:
             kwargs |= {"headers": {"Authorization": f"Bearer {self.session_token}"}}
-        response = requests.request(**kwargs).json()
-        if not suppress_error and response["result"] != "ok":
-            raise requests.HTTPError(f"I am not ok: {response['errors']}")
-        return response
+        response = requests.request(**kwargs)
+        if response.status_code == 429:
+            rate_limit_reset = int(response.headers["x-ratelimit-retry-after"])
+            sleep(rate_limit_reset - time() + 1)
+            response = requests.request(**kwargs)
+        if not response.ok and not suppress_error:
+            raise requests.HTTPError(f"I am not ok: {response.json()['errors']}")
+        return response.json()
 
     @property
     def session_token(self) -> str:

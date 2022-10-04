@@ -110,9 +110,13 @@ class SelectorScreen(AppScreen):
                 preview_text = "No chapters selected."
             self.set_preview(preview_text)
 
-    @mainthread
+    @threaded
     def confirm_selection(self):
         self.fetch_chapters()
+        self.go_to_editor()
+
+    @mainthread
+    def go_to_editor(self):
         self.manager.current = "editor_screen"
         self.manager.current_screen.selected_chapters = self.selected_chapters
         self.manager.current_screen.update_preview()

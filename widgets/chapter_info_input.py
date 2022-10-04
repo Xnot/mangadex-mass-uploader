@@ -24,7 +24,7 @@ class ReactiveInfoInput(ChapterInfoInput):
         super().__init__(**kwargs)
         # the event listener is scheduled to be bound at the first render
         # because kivy is dumb and can't access child nodes during init
-        Clock.schedule_once(self.bind_preview_event, 0)
+        Clock.schedule_once(self.bind_preview_event)
 
     def bind_preview_event(self, dt=0):
         self.ids["input"].bind(text=lambda *args: App.get_running_app().root.ids[self.target_screen].update_preview())
