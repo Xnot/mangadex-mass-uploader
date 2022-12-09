@@ -13,6 +13,7 @@ GridLayout:
 
         LoginScreen:
             screen_after_login: "selector_screen"
+            image_source: "mass_editor.png"
         SelectorScreen:
             id: selector_screen
         EditorScreen:
@@ -26,11 +27,11 @@ GridLayout:
         cols: 2
 
         GridLayout:
-            id: "input_container"
+            id: input_container
             cols: 1
 
             GridLayout:
-                id: "chapter_input_container"
+                id: chapter_input_container
                 cols: 2
 
                 ChapterInfoInput:
@@ -54,7 +55,7 @@ GridLayout:
                     id: chapter numbers
                     label: "chapter"
             GridLayout:
-                id: "buttons_container"
+                id: buttons_container
                 cols: 3
                 size_hint_y: 0.15
                 padding: (20, 25)

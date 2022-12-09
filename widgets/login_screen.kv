@@ -1,27 +1,73 @@
 <LoginScreen>:
     name: "login_screen"
+    image_source: ""
 
     GridLayout:
-        cols: 2
-        rows: 3
+        cols: 3
 
-        Label:
-            text: "username:"
+        PageLayout:
+        PageLayout:
+        PageLayout:
+            size_hint_x: 1.5
+        PageLayout:
 
-        TextInput:
-            id: username
-            multiline: False
+        GridLayout:
+            cols: 1
 
-        Label:
-            text: "password:"
+            GridLayout:
+                cols:1
+                padding: (200, 0, 0, 0)
 
-        TextInput:
-            id: password
-            multiline: False
-            password: True
+                Image:
+                    id: login_image
+                    source: root.image_source
 
-        Button:
-            id: login_button
-            text: "Login"
-            on_release:
-                root.login()
+            GridLayout:
+                cols: 2
+                padding: (5, 4)
+                spacing: (5, 5)
+
+                Label:
+                    text: "username:"
+                    text_size: self.size
+                    halign: "right"
+                    valign: "middle"
+
+
+                TextInput:
+                    id: username
+                    multiline: False
+                    write_tab: False
+                    on_text_validate:
+                        root.login()
+
+                Label:
+                    text: "password:"
+                    text_size: self.size
+                    halign: "right"
+                    valign: "middle"
+
+                TextInput:
+                    id: password
+                    multiline: False
+                    password: True
+                    write_tab: False
+                    on_text_validate:
+                        root.login()
+
+                PageLayout:
+
+                GridLayout:
+                    cols: 1
+                    padding: (40, 0)
+
+                    Button:
+                        id: login_button
+                        text: "Login"
+                        on_release:
+                            root.login()
+
+        PageLayout:
+        PageLayout:
+        PageLayout:
+        PageLayout:
