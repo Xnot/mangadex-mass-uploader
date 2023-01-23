@@ -11,6 +11,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
+        ("mass_editor.png", "."),
         ("MassEditorApp.kv", "."),
         ("mangadex_api.py", "."),
         ("CONSOLA.TTF", "."),
