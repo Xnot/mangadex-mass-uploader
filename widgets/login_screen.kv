@@ -1,6 +1,22 @@
+<LoginLabel@Label>
+    valign: "center"
+    size_hint_x: None
+    size_hint_y: None
+    width: 70
+    height: 30
+
+<LoginInput@TextInput>
+    multiline: False
+    write_tab: False
+    size_hint_y: None
+    height: 30
+    on_text_validate:
+        root.login()
+
 <LoginScreen>:
     name: "login_screen"
-    image_source: ""
+    login_image: ""
+    login_title: ""
 
     GridLayout:
         cols: 3
@@ -8,62 +24,57 @@
         PageLayout:
         PageLayout:
         PageLayout:
-            size_hint_x: 1.5
         PageLayout:
 
-        GridLayout:
-            cols: 1
-
+        AnchorLayout:
             GridLayout:
-                cols:1
-                padding: (200, 0, 0, 0)
+                size_hint_y: None
+                size_hint_x: None
+                height: 300
+                width: 400
+                cols: 1
 
-                Image:
-                    id: login_image
-                    source: root.image_source
-
-            GridLayout:
-                cols: 2
-                padding: (5, 4)
-                spacing: (5, 5)
+                AnchorLayout:
+                    Image:
+                        id: login_image
+                        source: root.login_image
+                        size_hint_x: None
+                        size_hint_y: None
+                        width: 152
+                        height: 130
 
                 Label:
-                    text: "username:"
-                    text_size: self.size
-                    halign: "right"
-                    valign: "middle"
-
-
-                TextInput:
-                    id: username
-                    multiline: False
-                    write_tab: False
-                    on_text_validate:
-                        root.login()
-
-                Label:
-                    text: "password:"
-                    text_size: self.size
-                    halign: "right"
-                    valign: "middle"
-
-                TextInput:
-                    id: password
-                    multiline: False
-                    password: True
-                    write_tab: False
-                    on_text_validate:
-                        root.login()
-
-                PageLayout:
+                    text: root.login_title
+                    bold: True
+                    markup: True
+                    font_size: 30
+                    size_hint_y: None
+                    height: 100
 
                 GridLayout:
-                    cols: 1
-                    padding: (40, 0)
+                    cols: 2
+                    spacing: (5, 5)
 
+                    LoginLabel:
+                        text: "username:"
+
+                    LoginInput:
+                        id: username
+
+                    LoginLabel:
+                        text: "password:"
+
+                    LoginInput:
+                        id: password
+
+                AnchorLayout:
                     Button:
                         id: login_button
                         text: "Login"
+                        size_hint_x: None
+                        size_hint_y: None
+                        width: 200
+                        height: 50
                         on_release:
                             root.login()
 
