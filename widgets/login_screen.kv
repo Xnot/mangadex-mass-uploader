@@ -10,8 +10,6 @@
     write_tab: False
     size_hint_y: None
     height: 30
-    on_text_validate:
-        root.login()
 
 <LoginScreen>:
     name: "login_screen"
@@ -60,12 +58,17 @@
 
                     LoginInput:
                         id: username
+                        on_text_validate:
+                            root.login()
 
                     LoginLabel:
                         text: "password:"
 
                     LoginInput:
                         id: password
+                        password: True
+                        on_text_validate:
+                            root.login()
 
                 AnchorLayout:
                     Button:
