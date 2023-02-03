@@ -139,25 +139,56 @@ class EditorScreen(AppScreen):
         chapter_count = len(self.selected_chapters)
         edited_values = {}
         for field_id, element in self.iter_info_inputs():
-            parsed_values = element.text.split("\n")
+            parsed_values: list[str | list[str]] | dict[str, list[list[str]]] = element.text.split("\n")
             # groups are comma-separated
             if field_id == "groups":
                 parsed_values = [value.split(",") for value in parsed_values]
+            # volume can have conditional inputs
+            if field_id == "volume":
+                parsed_values = [value.split(":") for value in parsed_values]
+                sequential_inputs = [value[0] for value in parsed_values if len(value) == 1]
+                conditional_inputs = [value for value in parsed_values if len(value) == 2]
+                parsed_values = {"sequential": sequential_inputs, "conditional": conditional_inputs}
+                if len(parsed_values["sequential"]) == 1:
+                    parsed_values["sequential"] = parsed_values["sequential"] * chapter_count
+                parsed_values["sequential"] += [""] * (chapter_count - len(parsed_values["sequential"]))
             # single inputs are repeated
-            if len(parsed_values) == 1:
+            if isinstance(parsed_values, list) and len(parsed_values) == 1:
                 parsed_values = parsed_values * chapter_count
             # pad inputs to chapter_count
-            parsed_values += [""] * (chapter_count - len(parsed_values))
+            if isinstance(parsed_values, list):
+                parsed_values += [""] * (chapter_count - len(parsed_values))
             edited_values[field_id] = parsed_values
         self.edited_chapters = []
         for chapter in self.selected_chapters:
             chapter = chapter.copy()
             for field in edited_values:
-                new_value = edited_values[field].pop(0)
+                field_values = edited_values[field]
+                if isinstance(field_values, dict):
+                    # apply conditionals first
+                    for condition, new_value in field_values["conditional"]:
+                        # empty inputs are ignored
+                        if new_value in ["", [""]]:
+                            continue
+                        # space is used to set field to null
+                        if new_value in [" ", [" "]]:
+                            new_value = None
+                        # condition can be a chapter or range
+                        if re.match(r"\d-\d", condition):
+                            start, end = sorted(float(endpoint) for endpoint in condition.split("-"))
+                            if SelectorScreen.is_in_range(start, end, chapter["chapter"]):
+                                chapter[field] = new_value
+                        elif condition == chapter["chapter"]:
+                            chapter[field] = new_value
+                    field_values = field_values["sequential"]
+                new_value = field_values.pop(0)
+                # empty inputs are ignored
                 if new_value in ["", [""]]:
                     continue
+                # space is used to set field to null
                 if new_value in [" ", [" "]]:
                     new_value = None
+                # strip whitespace
                 elif isinstance(new_value, list):
                     new_value = [value.strip() for value in new_value]
                 else:
