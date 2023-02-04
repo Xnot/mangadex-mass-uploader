@@ -174,7 +174,7 @@ class EditorScreen(AppScreen):
                         if new_value in [" ", [" "]]:
                             new_value = None
                         # condition can be a chapter or range
-                        if re.match(r"\d-\d", condition):
+                        if re.match(r"\d+-\d+", condition):
                             start, end = sorted(float(endpoint) for endpoint in condition.split("-"))
                             if SelectorScreen.is_in_range(start, end, chapter["chapter"]):
                                 chapter[field] = new_value
