@@ -216,7 +216,6 @@ class EditorScreen(AppScreen):
             edited_chapters = self.edited_chapters.copy()
             for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
                 if old_chapter == new_chapter:
-                    self.manager.logger.info(f"Skipping unchanged chapter {idx + 1}/{len(edited_chapters)}")
                     continue
                 self.manager.logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
                 try:
