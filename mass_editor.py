@@ -166,7 +166,7 @@ class EditorScreen(AppScreen):
                 field_values = edited_values[field]
                 if isinstance(field_values, dict):
                     # apply conditionals first
-                    for condition, new_value in field_values["conditional"]:
+                    for new_value, condition in field_values["conditional"]:
                         # empty inputs are ignored
                         if new_value in ["", [""]]:
                             continue
