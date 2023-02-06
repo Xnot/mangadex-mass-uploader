@@ -46,7 +46,7 @@ class SelectorScreen(AppScreen):
         if chapter is None:
             return False
         # only consider numerical portion at start of string
-        chapter_number = re.match(r"[0-9]+(\.[0-9]+)?", chapter)
+        chapter_number = re.match(r"[0-9]+(\.[0-9]+)?", chapter.strip())
         if chapter_number is None:
             return False
         return start <= float(chapter_number[0]) <= end
@@ -174,7 +174,7 @@ class EditorScreen(AppScreen):
                         if new_value in [" ", [" "]]:
                             new_value = None
                         # condition can be a chapter or range
-                        if re.match(r"\d+-\d+", condition):
+                        if re.match(r"\s*\d+\s*-\s*\d+\s*", condition):
                             start, end = sorted(float(endpoint) for endpoint in condition.split("-"))
                             if SelectorScreen.is_in_range(start, end, chapter["chapter"]):
                                 chapter[field] = new_value
