@@ -127,10 +127,10 @@ GridLayout:
                     label: "group ids"
             GridLayout:
                 id: "buttons_container"
-                cols: 4
+                cols: 5
                 size_hint_y: 0.15
-                padding: (20, 25)
-                spacing: (20, 0)
+                padding: (15, 25)
+                spacing: (15, 0)
 
                 Button:
                     id: return_to_selector_button
@@ -153,6 +153,13 @@ GridLayout:
                     background_normal: ""
                     on_release:
                         root.mass_delete()
+                Button:
+                    id: mass_deactivate_button
+                    text: "deactivate"
+                    background_color: "#e991edff"
+                    background_normal: ""
+                    on_release:
+                        root.mass_deactivate()
                 Button:
                     id: mass_edit_button
                     text: "edit"

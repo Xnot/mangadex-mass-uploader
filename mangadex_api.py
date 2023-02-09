@@ -132,3 +132,6 @@ class MangaDexAPI:
 
     def delete_chapter(self, chapter_id: str) -> None:
         self.send_request("delete", f"chapter/{chapter_id}")
+
+    def deactivate_chapter(self, chapter_id: str) -> None:
+        self.send_request("delete", f"admin/chapter/{chapter_id}/activate")

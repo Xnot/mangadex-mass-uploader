@@ -211,7 +211,11 @@ class EditorScreen(AppScreen):
 
     @threaded
     def mass_edit(self):
-        with self.toggle_button("mass_edit_button"), self.toggle_button("mass_delete_button"):
+        with (
+            self.toggle_button("mass_edit_button"),
+            self.toggle_button("mass_delete_button"),
+            self.toggle_button("mass_deactivate_button")
+        ):
             selected_chapters = self.selected_chapters.copy()
             edited_chapters = self.edited_chapters.copy()
             for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
@@ -227,7 +231,11 @@ class EditorScreen(AppScreen):
 
     @threaded
     def mass_delete(self):
-        with self.toggle_button("mass_edit_button"), self.toggle_button("mass_delete_button"):
+        with (
+            self.toggle_button("mass_edit_button"),
+            self.toggle_button("mass_delete_button"),
+            self.toggle_button("mass_deactivate_button")
+        ):
             selected_chapters = self.selected_chapters.copy()
             for idx, chapter in enumerate(selected_chapters):
                 self.manager.logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
@@ -236,6 +244,23 @@ class EditorScreen(AppScreen):
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
                     self.manager.logger.error(f"Could not delete chapter {idx + 1}/{len(selected_chapters)}")
+            self.manager.logger.info(f"Done")
+
+    @threaded
+    def mass_deactivate(self):
+        with (
+            self.toggle_button("mass_edit_button"),
+            self.toggle_button("mass_delete_button"),
+            self.toggle_button("mass_deactivate_button")
+        ):
+            selected_chapters = self.selected_chapters.copy()
+            for idx, chapter in enumerate(selected_chapters):
+                self.manager.logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
+                try:
+                    self.manager.md_api.deactivate_chapter(chapter["id"])
+                except HTTPError as exception:
+                    self.manager.logger.error(exception)
+                    self.manager.logger.error(f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}")
             self.manager.logger.info(f"Done")
 
 
