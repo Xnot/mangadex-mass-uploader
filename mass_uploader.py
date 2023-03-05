@@ -6,6 +6,7 @@ from kivy.config import Config
 
 Config.set("kivy", "desktop", 1)
 Config.set("graphics", "window_state", "maximized")
+Config.set("kivy", "exit_on_escape", 0)
 
 from kivy.app import App
 from natsort import natsorted
