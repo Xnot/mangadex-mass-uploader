@@ -8,7 +8,17 @@
         text: f"{root.label}:"
         text_size: self.size
         size_hint_y: 0.15
-    TextInput:
-        id: input
-        multiline: root.multiline
-        write_tab: False
+    ScrollView:
+        id: scroll_view
+        bar_width: 20
+        bar_color: [0.3, 0.3, 0.3, 0.9]
+        bar_inactive_color: [0.3, 0.3, 0.3, 0.7]
+        effect_cls: "ScrollEffect"
+        scroll_type: ["bars"]
+
+        TextInput:
+            id: input
+            multiline: root.multiline
+            write_tab: False
+            size_hint_y: None
+            height: max(self.minimum_height, scroll_view.height)
