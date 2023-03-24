@@ -85,11 +85,12 @@ class MangaDexAPI:
 
     def upload_chapter(self, chapter: dict) -> None:
         self.start_upload(chapter["manga"], chapter["groups"])
-        with ZipFile(chapter["file"]) as file:
-            pages = [page for page in natsorted(file.namelist()) if page.endswith((".jpg", ".jpeg", ".png", ".gif"))]
-            page_order = []
-            for page in pages:
-                page_order.append(self.upload_page(file.open(page)))
+        page_order = []
+        if chapter["file"]:
+            with ZipFile(chapter["file"]) as file:
+                pages = [page for page in natsorted(file.namelist()) if page.endswith((".jpg", ".jpeg", ".png", ".gif"))]
+                for page in pages:
+                    page_order.append(self.upload_page(file.open(page)))
         self.commit_upload(chapter["chapter_draft"], page_order)
 
     def get_chapter_list(self, filters: dict) -> list[dict]:

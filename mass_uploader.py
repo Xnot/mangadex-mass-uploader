@@ -44,7 +44,9 @@ class MassUploaderScreen(AppScreen):
         self.update_preview()
 
     def parse_chapters(self):
-        chapter_count = len(self.selected_files)
+        file_count = len(self.selected_files)
+        ext_url_count = len([value.strip() for value in self.ids["external_url"].text.split("\n")])
+        chapter_count = max(file_count, ext_url_count)
         if not chapter_count:
             self.chapters = []
         chapters = {"file": self.selected_files}
@@ -72,6 +74,7 @@ class MassUploaderScreen(AppScreen):
                 "chapter": ch_dict.pop("chapter"),
                 "title": ch_dict.pop("title"),
                 "translatedLanguage": ch_dict.pop("language"),
+                "externalUrl": ch_dict.pop("external_url"),
             }
             chapter_dicts.append(ch_dict)
         self.chapters = chapter_dicts
@@ -81,7 +84,7 @@ class MassUploaderScreen(AppScreen):
         self.parse_chapters()
         preview_text = ""
         for chapter in self.chapters:
-            preview_text += f"file: {os.path.basename(chapter['file'])}\n"
+            preview_text += f"file: {os.path.basename(str(chapter['file']))}\n"
             for field in ["manga", "groups", "chapter_draft"]:
                 preview_text += f"{field}: {chapter[field]}\n"
             preview_text += "\n"
