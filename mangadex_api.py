@@ -77,6 +77,8 @@ class MangaDexAPI:
         return response["data"][0]["id"]
 
     def commit_upload(self, chapter_draft: dict[str, str], page_order: list[str]) -> None:
+        if chapter_draft["externalUrl"] is None:
+            chapter_draft.pop("externalUrl")
         self.send_request(
             "post",
             f"upload/{self.upload_session}/commit",
