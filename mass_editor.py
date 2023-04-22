@@ -179,7 +179,7 @@ class EditorScreen(AppScreen):
                             start, end = sorted(float(endpoint) for endpoint in condition.split("-"))
                             if SelectorScreen.is_in_range(start, end, chapter["chapter"]):
                                 chapter[field] = new_value
-                        elif condition == chapter["chapter"]:
+                        elif condition.strip() == chapter["chapter"]:
                             chapter[field] = new_value
                     field_values = field_values["sequential"]
                 new_value = field_values.pop(0)
