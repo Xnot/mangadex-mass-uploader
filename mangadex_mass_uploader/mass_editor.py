@@ -1,14 +1,16 @@
+import kivy_config
+
 import functools
 import logging
 import re
 from typing import Union
 
-import kivy_config
 from kivy.app import App
 from kivy.clock import mainthread
 from kivy.lang import Builder
-from mangadex_api import MangaDexAPI
 from requests import HTTPError
+
+from mangadex_api import MangaDexAPI
 from utils import start_app, threaded
 from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
@@ -77,8 +79,16 @@ class SelectorScreen(AppScreen):
         # flatten dicts
         chapter_dicts = []
         for chapter in chapters:
-            manga = [relation["id"] for relation in chapter["relationships"] if relation["type"] == "manga"][0]
-            groups = [relation["id"] for relation in chapter["relationships"] if relation["type"] == "scanlation_group"]
+            manga = [
+                relation["id"]
+                for relation in chapter["relationships"]
+                if relation["type"] == "manga"
+            ][0]
+            groups = [
+                relation["id"]
+                for relation in chapter["relationships"]
+                if relation["type"] == "scanlation_group"
+            ]
             ch_dict = {
                 "id": chapter["id"],
                 "manga": manga,
@@ -135,7 +145,9 @@ class EditorScreen(AppScreen):
         chapter_count = len(self.selected_chapters)
         edited_values = {}
         for field_id, element in self.iter_info_inputs():
-            parsed_values: list[str | list[str]] | dict[str, list[list[str]]] = element.text.split("\n")
+            parsed_values: list[str | list[str]] | dict[str, list[list[str]]] = element.text.split(
+                "\n"
+            )
             # groups are comma-separated
             if field_id == "groups":
                 parsed_values = [value.split(",") for value in parsed_values]
@@ -150,7 +162,9 @@ class EditorScreen(AppScreen):
                 }
                 if len(parsed_values["sequential"]) == 1:
                     parsed_values["sequential"] = parsed_values["sequential"] * chapter_count
-                parsed_values["sequential"] += [""] * (chapter_count - len(parsed_values["sequential"]))
+                parsed_values["sequential"] += [""] * (
+                    chapter_count - len(parsed_values["sequential"])
+                )
             # single inputs are repeated
             if isinstance(parsed_values, list) and len(parsed_values) == 1:
                 parsed_values = parsed_values * chapter_count
@@ -174,7 +188,9 @@ class EditorScreen(AppScreen):
                             new_value = None
                         # condition can be a chapter or range
                         if re.match(r"\s*[0-9]+(\.[0-9]+)?\s*-\s*[0-9]+(\.[0-9]+)?\s*", condition):
-                            start, end = sorted(float(endpoint) for endpoint in condition.split("-"))
+                            start, end = sorted(
+                                float(endpoint) for endpoint in condition.split("-")
+                            )
                             if SelectorScreen.is_in_range(start, end, chapter["chapter"]):
                                 chapter[field] = new_value
                         elif condition.strip() == chapter["chapter"]:
@@ -217,7 +233,9 @@ class EditorScreen(AppScreen):
         ):
             selected_chapters = self.selected_chapters.copy()
             edited_chapters = self.edited_chapters.copy()
-            for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
+            for idx, (old_chapter, new_chapter) in enumerate(
+                zip(selected_chapters, edited_chapters)
+            ):
                 if old_chapter == new_chapter:
                     continue
                 self.manager.logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
@@ -225,7 +243,9 @@ class EditorScreen(AppScreen):
                     self.manager.md_api.edit_chapter(new_chapter.copy())
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
-                    self.manager.logger.error(f"Could not edit chapter {idx + 1}/{len(edited_chapters)}")
+                    self.manager.logger.error(
+                        f"Could not edit chapter {idx + 1}/{len(edited_chapters)}"
+                    )
             self.manager.logger.info(f"Done")
 
     @threaded
@@ -242,7 +262,9 @@ class EditorScreen(AppScreen):
                     self.manager.md_api.delete_chapter(chapter["id"])
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
-                    self.manager.logger.error(f"Could not delete chapter {idx + 1}/{len(selected_chapters)}")
+                    self.manager.logger.error(
+                        f"Could not delete chapter {idx + 1}/{len(selected_chapters)}"
+                    )
             self.manager.logger.info(f"Done")
 
     @threaded
@@ -254,12 +276,16 @@ class EditorScreen(AppScreen):
         ):
             selected_chapters = self.selected_chapters.copy()
             for idx, chapter in enumerate(selected_chapters):
-                self.manager.logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
+                self.manager.logger.info(
+                    f"Deactivating chapter {idx + 1}/{len(selected_chapters)}"
+                )
                 try:
                     self.manager.md_api.deactivate_chapter(chapter["id"])
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
-                    self.manager.logger.error(f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}")
+                    self.manager.logger.error(
+                        f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}"
+                    )
             self.manager.logger.info(f"Done")
 
 

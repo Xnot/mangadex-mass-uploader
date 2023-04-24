@@ -1,14 +1,16 @@
+import kivy_config
+
 import logging
 import os
 from itertools import zip_longest
 
-import kivy_config
 from kivy.app import App
 from kivy.lang import Builder
-from mangadex_api import MangaDexAPI
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
+
+from mangadex_api import MangaDexAPI
 from utils import start_app, threaded
 from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
@@ -63,7 +65,9 @@ class MassUploaderScreen(AppScreen):
         for chapter in zip_longest(*chapters.values()):
             ch_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
             ch_dict["manga"] = ch_dict.pop("manga_id")
-            ch_dict["groups"] = [ch_dict.pop(f"group_{idx}_id") for idx in range(1, 6) if ch_dict[f"group_{idx}_id"]]
+            ch_dict["groups"] = [
+                ch_dict.pop(f"group_{idx}_id") for idx in range(1, 6) if ch_dict[f"group_{idx}_id"]
+            ]
             ch_dict["chapter_draft"] = {
                 "volume": ch_dict.pop("volume"),
                 "chapter": ch_dict.pop("chapter"),
@@ -97,7 +101,9 @@ class MassUploaderScreen(AppScreen):
                     self.manager.md_api.upload_chapter(chapter)
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
-                    self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
+                    self.manager.logger.error(
+                        f"Could not upload chapter {idx + 1}/{len(chapters)}"
+                    )
             self.manager.logger.info(f"Done")
 
 

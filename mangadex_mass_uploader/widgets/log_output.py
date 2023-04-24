@@ -9,7 +9,9 @@ class APILogHandler(logging.Handler):
         super().__init__()
         self.output_panel = output_panel
         self.setFormatter(
-            logging.Formatter("%(asctime)s - %(levelname)-7s | %(message)s\n", datefmt="%Y-%m-%dT%H:%M:%S")
+            logging.Formatter(
+                "%(asctime)s - %(levelname)-7s | %(message)s\n", datefmt="%Y-%m-%dT%H:%M:%S"
+            )
         )
 
     @mainthread

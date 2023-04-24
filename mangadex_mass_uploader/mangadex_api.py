@@ -27,7 +27,9 @@ class MangaDexAPI:
         self._refresh_token = token["token"]["refresh"]
         self._refresh_at = time() + 880
         if self.upload_session:
-            self.logger.warning("You have an existing upload session. It will be deleted once uploading begins.")
+            self.logger.warning(
+                "You have an existing upload session. It will be deleted once uploading begins."
+            )
 
     def __del__(self):
         self.send_request("post", "auth/logout")
@@ -55,7 +57,9 @@ class MangaDexAPI:
     @property
     def session_token(self) -> str:
         if time() > self._refresh_at:
-            response = self.send_request("post", "auth/refresh", False, json={"token": self._refresh_token})
+            response = self.send_request(
+                "post", "auth/refresh", False, json={"token": self._refresh_token}
+            )
             self._session_token = response["token"]["session"]
             self._refresh_at = time() + 880
         return self._session_token
@@ -91,7 +95,9 @@ class MangaDexAPI:
         if chapter["file"]:
             with ZipFile(chapter["file"]) as file:
                 pages = [
-                    page for page in natsorted(file.namelist()) if page.endswith((".jpg", ".jpeg", ".png", ".gif"))
+                    page
+                    for page in natsorted(file.namelist())
+                    if page.endswith((".jpg", ".jpeg", ".png", ".gif"))
                 ]
                 for page in pages:
                     page_order.append(self.upload_page(file.open(page)))
@@ -107,7 +113,9 @@ class MangaDexAPI:
         filters["contentRating[]"] = ["safe", "suggestive", "erotica", "pornographic"]
         # replace None with "none" for volumes
         if filters["volume[]"] is not None:
-            filters["volume[]"] = ["none" if value is None else value for value in filters["volume[]"]]
+            filters["volume[]"] = [
+                "none" if value is None else value for value in filters["volume[]"]
+            ]
         # chapter number filter is done client-side since API only accepts 1 chapter
         chapter_filter = filters.pop("chapter numbers")
         response = self.send_request("get", "chapter", False, params=filters)
