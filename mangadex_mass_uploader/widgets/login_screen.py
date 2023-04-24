@@ -2,7 +2,7 @@ from kivy.clock import mainthread
 from kivy.uix.screenmanager import Screen
 from requests import HTTPError
 
-from utils import threaded
+from mangadex_mass_uploader.utils import threaded
 
 
 class LoginScreen(Screen):

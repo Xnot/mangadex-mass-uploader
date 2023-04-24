@@ -3,10 +3,10 @@
 ## Description
 This is a GUI tool to aid those who wish to farm 500 chapter uploads on [MangaDex](https://mangadex.org),
 but are not autistic enough to use the command line tools that other people have made.
-This will allow you to obtain the legendary `Power Uploader` role, 
-granting greater editing privileges on the website, 
-access to secret channels on the Discord server 
-where you can make connections with upper members of the scanlation cabal, 
+This will allow you to obtain the legendary `Power Uploader` role,
+granting greater editing privileges on the website,
+access to secret channels on the Discord server
+where you can make connections with upper members of the scanlation cabal,
 and the ability to flex on standard users.
 This script is only tested on Windows.
 

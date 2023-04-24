@@ -3,17 +3,12 @@ import logging
 import re
 from typing import Union
 
-from kivy.config import Config
-
-Config.set("kivy", "desktop", 1)
-Config.set("graphics", "window_state", "maximized")
-Config.set("kivy", "exit_on_escape", 0)
-
+import kivy_config
 from kivy.app import App
 from kivy.clock import mainthread
-from requests import HTTPError
-
+from kivy.lang import Builder
 from mangadex_api import MangaDexAPI
+from requests import HTTPError
 from utils import start_app, threaded
 from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
@@ -149,7 +144,10 @@ class EditorScreen(AppScreen):
                 parsed_values = [value.split(":") for value in parsed_values]
                 sequential_inputs = [value[0] for value in parsed_values if len(value) == 1]
                 conditional_inputs = [value for value in parsed_values if len(value) == 2]
-                parsed_values = {"sequential": sequential_inputs, "conditional": conditional_inputs}
+                parsed_values = {
+                    "sequential": sequential_inputs,
+                    "conditional": conditional_inputs,
+                }
                 if len(parsed_values["sequential"]) == 1:
                     parsed_values["sequential"] = parsed_values["sequential"] * chapter_count
                 parsed_values["sequential"] += [""] * (chapter_count - len(parsed_values["sequential"]))
@@ -215,7 +213,7 @@ class EditorScreen(AppScreen):
         with (
             self.toggle_button("mass_edit_button"),
             self.toggle_button("mass_delete_button"),
-            self.toggle_button("mass_deactivate_button")
+            self.toggle_button("mass_deactivate_button"),
         ):
             selected_chapters = self.selected_chapters.copy()
             edited_chapters = self.edited_chapters.copy()
@@ -235,7 +233,7 @@ class EditorScreen(AppScreen):
         with (
             self.toggle_button("mass_edit_button"),
             self.toggle_button("mass_delete_button"),
-            self.toggle_button("mass_deactivate_button")
+            self.toggle_button("mass_deactivate_button"),
         ):
             selected_chapters = self.selected_chapters.copy()
             for idx, chapter in enumerate(selected_chapters):
@@ -252,7 +250,7 @@ class EditorScreen(AppScreen):
         with (
             self.toggle_button("mass_edit_button"),
             self.toggle_button("mass_delete_button"),
-            self.toggle_button("mass_deactivate_button")
+            self.toggle_button("mass_deactivate_button"),
         ):
             selected_chapters = self.selected_chapters.copy()
             for idx, chapter in enumerate(selected_chapters):
@@ -267,8 +265,8 @@ class EditorScreen(AppScreen):
 
 class MassEditorApp(App):
     def build(self):
-        super().build()
-        self.icon = "mass_uploader.ico"
+        self.icon = "../assets/mass_editor.ico"
+        self.root = Builder.load_file("mass_editor.kv")
         self.root.ids["manager"].logger = logging.getLogger("api_logger")
         self.root.ids["manager"].md_api = MangaDexAPI()
 

@@ -2,18 +2,13 @@ import logging
 import os
 from itertools import zip_longest
 
-from kivy.config import Config
-
-Config.set("kivy", "desktop", 1)
-Config.set("graphics", "window_state", "maximized")
-Config.set("kivy", "exit_on_escape", 0)
-
+import kivy_config
 from kivy.app import App
+from kivy.lang import Builder
+from mangadex_api import MangaDexAPI
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
-
-from mangadex_api import MangaDexAPI
 from utils import start_app, threaded
 from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
@@ -109,7 +104,8 @@ class MassUploaderScreen(AppScreen):
 class MassUploaderApp(App):
     def build(self):
         super().build()
-        self.icon = "mass_uploader.ico"
+        self.icon = "../assets/mass_uploader.ico"
+        self.root = Builder.load_file("mass_editor.kv")
         self.root.ids["manager"].logger = logging.getLogger("api_logger")
         self.root.ids["manager"].md_api = MangaDexAPI()
 

@@ -1,5 +1,5 @@
 import logging
-from time import time, sleep
+from time import sleep, time
 from typing import IO, Union
 from zipfile import ZipFile
 
@@ -90,7 +90,9 @@ class MangaDexAPI:
         page_order = []
         if chapter["file"]:
             with ZipFile(chapter["file"]) as file:
-                pages = [page for page in natsorted(file.namelist()) if page.endswith((".jpg", ".jpeg", ".png", ".gif"))]
+                pages = [
+                    page for page in natsorted(file.namelist()) if page.endswith((".jpg", ".jpeg", ".png", ".gif"))
+                ]
                 for page in pages:
                     page_order.append(self.upload_page(file.open(page)))
         self.commit_upload(chapter["chapter_draft"], page_order)
