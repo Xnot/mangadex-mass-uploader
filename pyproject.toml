@@ -1,29 +1,56 @@
 [tool.poetry]
 name = "mangadex-mass-uploader"
-version = "2.0.0"
+version = "3.0.0"
 description = "try to get green!"
-authors = ["Xnot <xnot@outlook.com>"]
+authors = ["Xnot"]
 
 [tool.poetry.dependencies]
-python = "3.9.*"
-requests = ">=2.25.1"
-plyer = ">=2.0.0"
-natsort = ">=8.1.0"
-kivy = {extras = ["base"], version = ">=2.1.0"}
+python = "3.10.*"
+requests = ">=2.28.2"
+plyer = ">=2.1.0"
+natsort = ">=8.3.0"
+kivy = {git = "https://github.com/Xnot/kivy", rev = "fix/redundant-eventloop-import"}
 
-[tool.poetry.dev-dependencies]
-black = ">=22.1.0"
-isort = ">=5.10.1"
-pyinstaller = ">=5.0.1"
+[tool.poetry.group.dev.dependencies]
+black = ">=23.3.0"
+isort = ">=5.12.0"
+pyinstaller = ">=5.10.1"
+pre-commit = ">=3.2.2"
+pytest = ">=7.3.1"
+pylint = ">=2.17.2"
+fabric = ">=3.0.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
-line-length = 120
+line-length = 99
+target-version = ["py310"]
+
+[tool.pylint.messages_control]
+disable = [
+    "broad-except",
+    "logging-fstring-interpolation"
+]
+
+[tool.pylint.basic]
+good-names = ["_"]
+
+[tool.pylint.format]
+max-line-length = 99
+expected-line-ending-format = "CRLF"
+
+[tool.pylint.design]
+max-locals = 10
+max-branches = 8
+max-attributes = 10
+max-bool-expr = 3
 
 [tool.isort]
 profile = "black"
-py_version = 39
-line_length = 120
+line_length = 99
+py_version = 310
+src_paths = ["mangadex_mass_uploader"]
+sections = ["KIVY_CONFIG", "FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_kivy_config = ["kivy_config"]
