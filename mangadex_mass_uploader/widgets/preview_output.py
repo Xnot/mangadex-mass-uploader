@@ -1,7 +1,7 @@
-from kivy.uix.scrollview import ScrollView
+from mangadex_mass_uploader.widgets.scrollbar_view import ScrollbarView
 
 
-class PreviewOutput(ScrollView):
+class PreviewOutput(ScrollbarView):
     @property
     def text(self):
         return self.ids["preview_text"].text

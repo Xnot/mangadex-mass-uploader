@@ -1,7 +1,15 @@
+#:include widgets/scrollbar_view.kv
+
+
 <LogOutput>:
-    id: log_output
-    text: ""
-    font_name : "../assets/CONSOLA.ttf"
-    multiline: True
-    readonly: True
     size_hint_y: 0.25
+    text: ""
+
+    TextInput:
+        id: log_output
+        text: root.text
+        font_name : "../assets/CONSOLA.ttf"
+        multiline: True
+        readonly: True
+        size_hint_y: None
+        height: max(self.minimum_height, root.height)

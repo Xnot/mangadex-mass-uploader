@@ -1,11 +1,8 @@
+#:include widgets/scrollbar_view.kv
+
+
 <PreviewOutput>:
-    bar_width: 20
-    bar_color: [0.3, 0.3, 0.3, 0.9]
-    bar_inactive_color: [0.3, 0.3, 0.3, 0.7]
-    effect_cls: "ScrollEffect"
-    scroll_type: ["bars"]
     size_hint_x: 0.65
-    on_pos: self.pos = tuple(map(int, args[1]))
     initial_text: ""
 
     TextInput:
@@ -15,4 +12,4 @@
         readonly: True
         size_hint_x: 1
         size_hint_y: None
-        height: self.minimum_height
+        height: max(self.minimum_height, root.height)
