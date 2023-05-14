@@ -1,26 +1,9 @@
 #:include widgets/chapter_info_input.kv
-#:include widgets/log_output.kv
-#:include widgets/login_screen.kv
 #:include widgets/preview_output.kv
 
 
-GridLayout:
-    cols: 1
-    rows: 2
-
-    ScreenManager:
-        id: manager
-
-        LoginScreen:
-            screen_after_login: "mass_uploader_screen"
-            login_image: "../assets/mass_uploader.png"
-            login_title: "Manga[color=FF6740]Dex[/color] Mass[color=41CE73]Uploader[/color]"
-        MassUploaderScreen:
-            id: mass_uploader_screen
-    LogOutput:
-
-<MassUploaderScreen>:
-    name: "mass_uploader_screen"
+<UploaderScreen>:
+    name: "uploader_screen"
 
     GridLayout:
         cols: 2

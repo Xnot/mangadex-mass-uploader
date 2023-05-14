@@ -1,28 +1,9 @@
 #:include widgets/chapter_info_input.kv
-#:include widgets/log_output.kv
-#:include widgets/login_screen.kv
 #:include widgets/preview_output.kv
 
 
-GridLayout:
-    cols: 1
-    rows: 2
-
-    ScreenManager:
-        id: manager
-
-        LoginScreen:
-            screen_after_login: "selector_screen"
-            login_image: "../assets/mass_editor.png"
-            login_title: "Manga[color=FF6740]Dex[/color] Mass[color=DBD749]Editor[/color]"
-        SelectorScreen:
-            id: selector_screen
-        EditorScreen:
-            id: editor_screen
-    LogOutput:
-
-<SelectorScreen>:
-    name: "selector_screen"
+<EditSelectionScreen>:
+    name: "edit_selection_screen"
 
     GridLayout:
         cols: 2
@@ -96,8 +77,8 @@ GridLayout:
                 Multiple groups can be added to a single chapter by comma-separating them.
                 You can also assign volume numbers to a specific chapter number or range of chapters by using "1:1-5" for example to assign volume 1 to all chapters between 1 and 5."""
 
-<EditorScreen>:
-    name: "editor_screen"
+<EditModificationScreen>:
+    name: "edit_modification_screen"
 
     GridLayout:
         cols: 2

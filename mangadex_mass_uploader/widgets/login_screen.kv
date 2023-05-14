@@ -13,8 +13,6 @@
 
 <LoginScreen>:
     name: "login_screen"
-    login_image: ""
-    login_title: ""
 
     GridLayout:
         cols: 3
@@ -35,19 +33,17 @@
                 AnchorLayout:
                     Image:
                         id: login_image
-                        source: root.login_image
+                        source: "../assets/mangadex.png"
                         size_hint_x: None
                         size_hint_y: None
-                        width: 152
-                        height: 130
 
                 Label:
-                    text: root.login_title
+                    text: "Manga[color=FF6740]Dex[/color]"
                     bold: True
                     markup: True
-                    font_size: 30
+                    font_size: 25
                     size_hint_y: None
-                    height: 100
+                    height: 75
 
                 GridLayout:
                     cols: 2

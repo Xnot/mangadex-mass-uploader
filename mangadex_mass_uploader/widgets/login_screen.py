@@ -23,4 +23,4 @@ class LoginScreen(Screen):
 
     @mainthread
     def leave_login_screen(self):
-        self.manager.current = self.screen_after_login
+        self.manager.current = "app_selection_screen"

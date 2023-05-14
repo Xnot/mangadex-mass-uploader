@@ -1,29 +1,36 @@
-import kivy_config
-
 import functools
 import logging
 import re
 from typing import Union
 
-from kivy.app import App
 from kivy.clock import mainthread
-from kivy.lang import Builder
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
-from utils import start_app, threaded
+from utils import threaded, toggle_button
 from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
-from widgets.log_output import LogOutput
-from widgets.login_screen import LoginScreen
 from widgets.preview_output import PreviewOutput
+
+# TODO switch to font that supports japanese
+# TODO update spec and throw in py build script
+# TODO add usage section to readme
+# TODO add min height to scroll bars?
+# TODO text scaling
+# TODO not fullscreen?
+# TODO edit manga & uploader fields
+# TODO add debug flag for prefills
+# TODO pipeline with auto build and release
+# TODO add discord hook or bot to auto-post releases
+# TODO improved logging thing with revert logic
+# TODO upload session checking probably broke
 
 
 class EditorInfoInput(ReactiveInfoInput):
-    target_screen = "editor_screen"
+    target_screen = "edit_modification_screen"
 
 
-class SelectorScreen(AppScreen):
+class EditSelectionScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_chapters = []
@@ -60,7 +67,7 @@ class SelectorScreen(AppScreen):
         for entry in filter_set:
             try:
                 start, end = sorted(float(endpoint) for endpoint in entry.split("-"))
-                range_filters |= {functools.partial(SelectorScreen.is_in_range, start, end)}
+                range_filters |= {functools.partial(EditSelectionScreen.is_in_range, start, end)}
             except (ValueError, AttributeError):
                 normal_filters |= {entry}
         return {"normal_filters": normal_filters, "range_filters": range_filters}
@@ -123,12 +130,12 @@ class SelectorScreen(AppScreen):
 
     @mainthread
     def go_to_editor(self):
-        self.manager.current = "editor_screen"
+        self.manager.current = "edit_modification_screen"
         self.manager.current_screen.selected_chapters = self.selected_chapters
         self.manager.current_screen.update_preview()
 
 
-class EditorScreen(AppScreen):
+class EditModificationScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_chapters = []
@@ -139,7 +146,7 @@ class EditorScreen(AppScreen):
 
     @mainthread
     def return_to_selector(self):
-        self.manager.current = "selector_screen"
+        self.manager.current = "edit_selection_screen"
 
     def parse_edits(self):
         chapter_count = len(self.selected_chapters)
@@ -191,7 +198,7 @@ class EditorScreen(AppScreen):
                             start, end = sorted(
                                 float(endpoint) for endpoint in condition.split("-")
                             )
-                            if SelectorScreen.is_in_range(start, end, chapter["chapter"]):
+                            if EditSelectionScreen.is_in_range(start, end, chapter["chapter"]):
                                 chapter[field] = new_value
                         elif condition.strip() == chapter["chapter"]:
                             chapter[field] = new_value
@@ -225,77 +232,49 @@ class EditorScreen(AppScreen):
         self.set_preview(preview_text)
 
     @threaded
+    @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
     def mass_edit(self):
-        with (
-            self.toggle_button("mass_edit_button"),
-            self.toggle_button("mass_delete_button"),
-            self.toggle_button("mass_deactivate_button"),
-        ):
-            selected_chapters = self.selected_chapters.copy()
-            edited_chapters = self.edited_chapters.copy()
-            for idx, (old_chapter, new_chapter) in enumerate(
-                zip(selected_chapters, edited_chapters)
-            ):
-                if old_chapter == new_chapter:
-                    continue
-                self.manager.logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
-                try:
-                    MangaDexAPI().edit_chapter(new_chapter.copy())
-                except HTTPError as exception:
-                    self.manager.logger.error(exception)
-                    self.manager.logger.error(
-                        f"Could not edit chapter {idx + 1}/{len(edited_chapters)}"
-                    )
-            self.manager.logger.info(f"Done")
-
-    @threaded
-    def mass_delete(self):
-        with (
-            self.toggle_button("mass_edit_button"),
-            self.toggle_button("mass_delete_button"),
-            self.toggle_button("mass_deactivate_button"),
-        ):
-            selected_chapters = self.selected_chapters.copy()
-            for idx, chapter in enumerate(selected_chapters):
-                self.manager.logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
-                try:
-                    MangaDexAPI().delete_chapter(chapter["id"])
-                except HTTPError as exception:
-                    self.manager.logger.error(exception)
-                    self.manager.logger.error(
-                        f"Could not delete chapter {idx + 1}/{len(selected_chapters)}"
-                    )
-            self.manager.logger.info(f"Done")
-
-    @threaded
-    def mass_deactivate(self):
-        with (
-            self.toggle_button("mass_edit_button"),
-            self.toggle_button("mass_delete_button"),
-            self.toggle_button("mass_deactivate_button"),
-        ):
-            selected_chapters = self.selected_chapters.copy()
-            for idx, chapter in enumerate(selected_chapters):
-                self.manager.logger.info(
-                    f"Deactivating chapter {idx + 1}/{len(selected_chapters)}"
+        selected_chapters = self.selected_chapters.copy()
+        edited_chapters = self.edited_chapters.copy()
+        for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
+            if old_chapter == new_chapter:
+                continue
+            self.manager.logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
+            try:
+                MangaDexAPI().edit_chapter(new_chapter.copy())
+            except HTTPError as exception:
+                self.manager.logger.error(exception)
+                self.manager.logger.error(
+                    f"Could not edit chapter {idx + 1}/{len(edited_chapters)}"
                 )
-                try:
-                    MangaDexAPI().deactivate_chapter(chapter["id"])
-                except HTTPError as exception:
-                    self.manager.logger.error(exception)
-                    self.manager.logger.error(
-                        f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}"
-                    )
-            self.manager.logger.info(f"Done")
+        self.manager.logger.info(f"Done")
 
+    @threaded
+    @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
+    def mass_delete(self):
+        selected_chapters = self.selected_chapters.copy()
+        for idx, chapter in enumerate(selected_chapters):
+            self.manager.logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
+            try:
+                MangaDexAPI().delete_chapter(chapter["id"])
+            except HTTPError as exception:
+                self.manager.logger.error(exception)
+                self.manager.logger.error(
+                    f"Could not delete chapter {idx + 1}/{len(selected_chapters)}"
+                )
+        self.manager.logger.info(f"Done")
 
-class MassEditorApp(App):
-    def build(self):
-        self.icon = "../assets/mass_editor.ico"
-        self.root = Builder.load_file("mass_editor.kv")
-        self.root.ids["manager"].logger = logging.getLogger("api_logger")
-        self.root.ids["manager"].md_api = MangaDexAPI()
-
-
-if __name__ == "__main__":
-    start_app(MassEditorApp())
+    @threaded
+    @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
+    def mass_deactivate(self):
+        selected_chapters = self.selected_chapters.copy()
+        for idx, chapter in enumerate(selected_chapters):
+            self.manager.logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
+            try:
+                MangaDexAPI().deactivate_chapter(chapter["id"])
+            except HTTPError as exception:
+                self.manager.logger.error(exception)
+                self.manager.logger.error(
+                    f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}"
+                )
+        self.manager.logger.info(f"Done")

@@ -1,29 +1,23 @@
-import kivy_config
-
 import logging
 import os
 from itertools import zip_longest
 
-from kivy.app import App
-from kivy.lang import Builder
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
 
 from mangadex_api import MangaDexAPI
-from utils import start_app, threaded
+from utils import threaded, toggle_button
 from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
-from widgets.log_output import LogOutput
-from widgets.login_screen import LoginScreen
 from widgets.preview_output import PreviewOutput
 
 
 class UploaderInfoInput(ReactiveInfoInput):
-    target_screen = "mass_uploader_screen"
+    target_screen = "uploader_screen"
 
 
-class MassUploaderScreen(AppScreen):
+class UploaderScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.selected_files = []
@@ -92,29 +86,14 @@ class MassUploaderScreen(AppScreen):
         self.set_preview(preview_text)
 
     @threaded
+    @toggle_button("mass_upload_button")
     def mass_upload(self):
-        with self.toggle_button("mass_upload_button"):
-            chapters = self.chapters.copy()
-            for idx, chapter in enumerate(chapters):
-                self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
-                try:
-                    MangaDexAPI().upload_chapter(chapter)
-                except HTTPError as exception:
-                    self.manager.logger.error(exception)
-                    self.manager.logger.error(
-                        f"Could not upload chapter {idx + 1}/{len(chapters)}"
-                    )
-            self.manager.logger.info(f"Done")
-
-
-class MassUploaderApp(App):
-    def build(self):
-        super().build()
-        self.icon = "../assets/mass_uploader.ico"
-        self.root = Builder.load_file("mass_editor.kv")
-        self.root.ids["manager"].logger = logging.getLogger("api_logger")
-        self.root.ids["manager"].md_api = MangaDexAPI()
-
-
-if __name__ == "__main__":
-    start_app(MassUploaderApp())
+        chapters = self.chapters.copy()
+        for idx, chapter in enumerate(chapters):
+            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
+            try:
+                MangaDexAPI().upload_chapter(chapter)
+            except HTTPError as exception:
+                self.manager.logger.error(exception)
+                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
+        self.manager.logger.info(f"Done")
