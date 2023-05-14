@@ -13,8 +13,9 @@ This script is only tested on Windows.
 ## Installation
 ### Windows
 1. Download and run the .exe from the releases page.
+2. If Windows Defender complains, tell it to fuck off. Just trust me bro.
 ### Linux
-1. Install python 3.9.
+1. Install python 3.10.
 2. Install poetry.
 3. I assume the average linux user knows how to clone this repo.
 4. `poetry install` in the repo folder.
