@@ -26,10 +26,6 @@ class MangaDexAPI:
         self._session_token = token["token"]["session"]
         self._refresh_token = token["token"]["refresh"]
         self._refresh_at = time() + 880
-        if self.upload_session:
-            self.logger.warning(
-                "You have an existing upload session. It will be deleted once uploading begins."
-            )
 
     def __del__(self):
         self.send_request("post", "auth/logout")
