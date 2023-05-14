@@ -71,7 +71,7 @@ class SelectorScreen(AppScreen):
             filters[field_id] = self.parse_filter(element.text)
         filters["chapter numbers"] = self.parse_range_filters(filters["chapter numbers"])
         try:
-            chapters = self.manager.md_api.get_chapter_list(filters)
+            chapters = MangaDexAPI().get_chapter_list(filters)
         except HTTPError as exception:
             self.manager.logger.error(exception)
             self.manager.logger.error(f"Could not get chapters from the API")
@@ -240,7 +240,7 @@ class EditorScreen(AppScreen):
                     continue
                 self.manager.logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
                 try:
-                    self.manager.md_api.edit_chapter(new_chapter.copy())
+                    MangaDexAPI().edit_chapter(new_chapter.copy())
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
                     self.manager.logger.error(
@@ -259,7 +259,7 @@ class EditorScreen(AppScreen):
             for idx, chapter in enumerate(selected_chapters):
                 self.manager.logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
                 try:
-                    self.manager.md_api.delete_chapter(chapter["id"])
+                    MangaDexAPI().delete_chapter(chapter["id"])
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
                     self.manager.logger.error(
@@ -280,7 +280,7 @@ class EditorScreen(AppScreen):
                     f"Deactivating chapter {idx + 1}/{len(selected_chapters)}"
                 )
                 try:
-                    self.manager.md_api.deactivate_chapter(chapter["id"])
+                    MangaDexAPI().deactivate_chapter(chapter["id"])
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
                     self.manager.logger.error(

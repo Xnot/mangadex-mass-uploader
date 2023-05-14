@@ -6,8 +6,10 @@ from zipfile import ZipFile
 import requests
 from natsort import natsorted
 
+from mangadex_mass_uploader.utils import Singleton
 
-class MangaDexAPI:
+
+class MangaDexAPI(metaclass=Singleton):
     API_URL = "https://api.mangadex.org"
 
     def __init__(self):

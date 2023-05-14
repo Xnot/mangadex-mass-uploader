@@ -98,7 +98,7 @@ class MassUploaderScreen(AppScreen):
             for idx, chapter in enumerate(chapters):
                 self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
                 try:
-                    self.manager.md_api.upload_chapter(chapter)
+                    MangaDexAPI().upload_chapter(chapter)
                 except HTTPError as exception:
                     self.manager.logger.error(exception)
                     self.manager.logger.error(

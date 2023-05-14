@@ -18,3 +18,12 @@ def start_app(app: App):
     if hasattr(sys, "_MEIPASS"):
         resource_add_path(os.path.join(sys._MEIPASS))
     app.run()
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
