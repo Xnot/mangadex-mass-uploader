@@ -1,6 +1,6 @@
 import logging
 from time import sleep, time
-from typing import IO, Union
+from typing import IO
 from zipfile import ZipFile
 
 import requests
@@ -63,7 +63,7 @@ class MangaDexAPI(metaclass=Singleton):
         return self._session_token
 
     @property
-    def upload_session(self) -> Union[str, None]:
+    def upload_session(self) -> str | None:
         response = self.send_request("get", "upload", suppress_error=True)
         if response["result"] == "ok":
             return response["data"]["id"]

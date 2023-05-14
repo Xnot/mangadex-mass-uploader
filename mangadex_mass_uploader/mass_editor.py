@@ -1,7 +1,6 @@
 import functools
 import logging
 import re
-from typing import Union
 
 from kivy.clock import mainthread
 from requests import HTTPError
@@ -41,7 +40,7 @@ class EditSelectionScreen(AppScreen):
         self.selected_chapters = []
 
     @staticmethod
-    def parse_filter(value: str) -> Union[None, set[Union[None, str]]]:
+    def parse_filter(value: str) -> None | set[None | str]:
         split_values = value.split("\n")
         if len(split_values) == 1 and split_values[0] == "":
             return None
@@ -49,7 +48,7 @@ class EditSelectionScreen(AppScreen):
         return set(split_values)
 
     @staticmethod
-    def is_in_range(start: float, end: float, chapter: Union[None, str]) -> bool:
+    def is_in_range(start: float, end: float, chapter: None | str) -> bool:
         if chapter is None:
             return False
         # only consider numerical portion at start of string
@@ -60,8 +59,8 @@ class EditSelectionScreen(AppScreen):
 
     @staticmethod
     def parse_range_filters(
-        filter_set: Union[None, set[Union[None, str]]]
-    ) -> Union[None, dict[str, set[Union[None, str, callable]]]]:
+        filter_set: None | set[None | str],
+    ) -> None | dict[str, set[None | str | callable]]:
         if filter_set is None:
             return None
         normal_filters = set()
