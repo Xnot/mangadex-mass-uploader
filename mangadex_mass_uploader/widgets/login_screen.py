@@ -1,26 +1,26 @@
+import logging
+from sys import argv
+
 from kivy.clock import mainthread
 from kivy.uix.screenmanager import Screen
 from requests import HTTPError
 
-from mangadex_mass_uploader.utils import threaded
+from mangadex_mass_uploader.mangadex_api import MangaDexAPI
+from mangadex_mass_uploader.utils import threaded, toggle_button
 
 
 class LoginScreen(Screen):
     @threaded
+    @toggle_button("login_button")
     def login(self):
-        self.toggle_login_button()
         try:
-            self.manager.md_api.login(self.ids["username"].text, self.ids["password"].text)
+            if "bypass_login" not in argv:
+                MangaDexAPI().login(self.ids["username"].text, self.ids["password"].text)
         except HTTPError as exception:
-            self.manager.logger.error(exception)
+            logging.getLogger("api_logger").error(exception)
         else:
             self.leave_login_screen()
-        self.toggle_login_button()
 
     @mainthread
     def leave_login_screen(self):
         self.manager.current = self.screen_after_login
-
-    @mainthread
-    def toggle_login_button(self):
-        self.ids["login_button"].disabled = not self.ids["login_button"].disabled
