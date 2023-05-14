@@ -25,6 +25,8 @@ from widgets.preview_output import PreviewOutput
 # TODO improved logging thing with revert logic
 # TODO upload session checking probably broke
 
+logger = logging.getLogger("api_logger")
+
 
 class EditorInfoInput(ReactiveInfoInput):
     target_screen = "edit_modification_screen"
@@ -80,8 +82,8 @@ class EditSelectionScreen(AppScreen):
         try:
             chapters = MangaDexAPI().get_chapter_list(filters)
         except HTTPError as exception:
-            self.manager.logger.error(exception)
-            self.manager.logger.error(f"Could not get chapters from the API")
+            logger.error(exception)
+            logger.error(f"Could not get chapters from the API")
             chapters = []
         # flatten dicts
         chapter_dicts = []
@@ -239,42 +241,36 @@ class EditModificationScreen(AppScreen):
         for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
             if old_chapter == new_chapter:
                 continue
-            self.manager.logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
+            logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
             try:
                 MangaDexAPI().edit_chapter(new_chapter.copy())
             except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(
-                    f"Could not edit chapter {idx + 1}/{len(edited_chapters)}"
-                )
-        self.manager.logger.info(f"Done")
+                logger.error(exception)
+                logger.error(f"Could not edit chapter {idx + 1}/{len(edited_chapters)}")
+        logger.info(f"Done")
 
     @threaded
     @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
     def mass_delete(self):
         selected_chapters = self.selected_chapters.copy()
         for idx, chapter in enumerate(selected_chapters):
-            self.manager.logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
+            logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
             try:
                 MangaDexAPI().delete_chapter(chapter["id"])
             except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(
-                    f"Could not delete chapter {idx + 1}/{len(selected_chapters)}"
-                )
-        self.manager.logger.info(f"Done")
+                logger.error(exception)
+                logger.error(f"Could not delete chapter {idx + 1}/{len(selected_chapters)}")
+        logger.info(f"Done")
 
     @threaded
     @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
     def mass_deactivate(self):
         selected_chapters = self.selected_chapters.copy()
         for idx, chapter in enumerate(selected_chapters):
-            self.manager.logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
+            logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
             try:
                 MangaDexAPI().deactivate_chapter(chapter["id"])
             except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(
-                    f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}"
-                )
-        self.manager.logger.info(f"Done")
+                logger.error(exception)
+                logger.error(f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}")
+        logger.info(f"Done")

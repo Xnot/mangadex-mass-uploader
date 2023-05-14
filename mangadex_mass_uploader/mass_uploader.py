@@ -12,6 +12,8 @@ from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
 from widgets.preview_output import PreviewOutput
 
+logger = logging.getLogger("api_logger")
+
 
 class UploaderInfoInput(ReactiveInfoInput):
     target_screen = "uploader_screen"
@@ -90,10 +92,10 @@ class UploaderScreen(AppScreen):
     def mass_upload(self):
         chapters = self.chapters.copy()
         for idx, chapter in enumerate(chapters):
-            self.manager.logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
+            logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
             try:
                 MangaDexAPI().upload_chapter(chapter)
             except HTTPError as exception:
-                self.manager.logger.error(exception)
-                self.manager.logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
-        self.manager.logger.info(f"Done")
+                logger.error(exception)
+                logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
+        logger.info(f"Done")
