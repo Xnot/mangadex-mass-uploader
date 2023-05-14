@@ -20,6 +20,25 @@ def start_app(app: App):
     app.run()
 
 
+def toggle_button(button_ids: str | list[str]) -> callable:
+    if isinstance(button_ids, str):
+        button_ids = [button_ids]
+
+    def button_toggle_decorator(method: callable) -> callable:
+        def decorated_method(self, *args, **kwargs):
+            for button_id in button_ids:
+                self.ids[button_id].disabled = True
+            try:
+                method(self, *args, **kwargs)
+            finally:
+                for button_id in button_ids:
+                    self.ids[button_id].disabled = False
+
+        return decorated_method
+
+    return button_toggle_decorator
+
+
 class Singleton(type):
     _instances = {}
 

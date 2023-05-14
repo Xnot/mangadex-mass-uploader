@@ -3,16 +3,11 @@ from contextlib import contextmanager
 from kivy.clock import mainthread
 from kivy.uix.screenmanager import Screen
 
+from mangadex_mass_uploader.utils import toggle_button
 from mangadex_mass_uploader.widgets.chapter_info_input import ChapterInfoInput
 
 
 class AppScreen(Screen):
-    @contextmanager
-    def toggle_button(self, button_id: str):
-        self.ids[button_id].disabled = True
-        yield
-        self.ids[button_id].disabled = False
-
     @mainthread
     def set_preview(self, preview_text: str):
         self.ids["preview"].text = preview_text
@@ -24,9 +19,9 @@ class AppScreen(Screen):
         pass
 
     @mainthread
+    @toggle_button("clear_all_button")
     def clear_all_fields(self):
-        with self.toggle_button("clear_all_button"):
-            for _, element in self.iter_info_inputs():
-                element.text = ""
-            self.clear_inputs()
-            self.update_preview()
+        for _, element in self.iter_info_inputs():
+            element.text = ""
+        self.clear_inputs()
+        self.update_preview()

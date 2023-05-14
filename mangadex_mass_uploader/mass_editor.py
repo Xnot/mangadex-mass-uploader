@@ -103,18 +103,18 @@ class SelectorScreen(AppScreen):
         self.selected_chapters = chapter_dicts
 
     @threaded
+    @toggle_button("update_preview_button")
     def update_preview(self):
-        with self.toggle_button("update_preview_button"):
-            self.fetch_chapters()
-            preview_text = ""
-            for chapter in self.selected_chapters:
-                chapter = chapter.copy()
-                for field in ["id", "manga", "groups"]:
-                    preview_text += f"{field}: {chapter.pop(field)}\n"
-                preview_text += f"{chapter}\n\n"
-            if preview_text == "":
-                preview_text = "No chapters selected."
-            self.set_preview(preview_text)
+        self.fetch_chapters()
+        preview_text = ""
+        for chapter in self.selected_chapters:
+            chapter = chapter.copy()
+            for field in ["id", "manga", "groups"]:
+                preview_text += f"{field}: {chapter.pop(field)}\n"
+            preview_text += f"{chapter}\n\n"
+        if preview_text == "":
+            preview_text = "No chapters selected."
+        self.set_preview(preview_text)
 
     @threaded
     def confirm_selection(self):
