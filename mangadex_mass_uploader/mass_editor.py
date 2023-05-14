@@ -1,6 +1,7 @@
 import functools
 import logging
 import re
+from typing import Callable
 
 from kivy.clock import mainthread
 from requests import HTTPError
@@ -60,7 +61,7 @@ class EditSelectionScreen(AppScreen):
     @staticmethod
     def parse_range_filters(
         filter_set: None | set[None | str],
-    ) -> None | dict[str, set[None | str | callable]]:
+    ) -> None | dict[str, set[None | str | Callable]]:
         if filter_set is None:
             return None
         normal_filters = set()
