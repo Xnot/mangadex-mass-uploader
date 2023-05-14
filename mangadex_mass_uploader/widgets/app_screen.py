@@ -12,7 +12,7 @@ class AppScreen(Screen):
     def set_preview(self, preview_text: str):
         self.ids["preview"].text = preview_text
 
-    def iter_info_inputs(self):
+    def iter_info_inputs(self) -> filter:
         return filter(lambda item: isinstance(item[1], ChapterInfoInput), self.ids.items())
 
     def clear_inputs(self):
