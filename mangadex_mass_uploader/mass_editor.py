@@ -24,6 +24,8 @@ from widgets.preview_output import PreviewOutput
 # TODO add discord hook or bot to auto-post releases
 # TODO improved logging thing with revert logic
 # TODO upload session checking probably broke
+# TODO confirmation dialog for delete/disable and cancel button
+# TODO multi group edit is not the same as V3 mass editor
 
 logger = logging.getLogger("api_logger")
 

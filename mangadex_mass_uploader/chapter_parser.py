@@ -31,6 +31,7 @@ def parse_upload_input(text_inputs: Iterable, files: list) -> list[Chapter]:
         return []
     chapters = {"file": files}
     # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
+    # TODO use float instead of int?
     if len(inputs["chapter"]) == 1 and inputs["chapter"][0].isdigit():
         first_digit = int(inputs["chapter"][0])
         inputs["chapter"] = [
