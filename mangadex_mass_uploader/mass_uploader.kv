@@ -1,4 +1,3 @@
-#:include widgets/chapter_info_input.kv
 #:include widgets/preview_output.kv
 
 
@@ -9,11 +8,11 @@
         cols: 2
 
         GridLayout:
-            id: "input_container"
+            id: input_container
             cols: 1
 
             GridLayout:
-                id: "uploader_input_container"
+                id: uploader_input_container
                 cols: 4
 
                 UploaderInfoInput:
@@ -50,7 +49,7 @@
                     id: external_url
                     label: "external url"
             GridLayout:
-                id: "buttons_container"
+                id: buttons_container
                 cols: 3
                 size_hint_y: 0.15
                 padding: (20, 25)
