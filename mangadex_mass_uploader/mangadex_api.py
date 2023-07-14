@@ -1,6 +1,6 @@
 import logging
 from time import sleep, time
-from typing import IO
+from typing import IO, Callable
 from zipfile import ZipFile
 
 import requests
@@ -32,12 +32,16 @@ class MangaDexAPI(metaclass=Singleton):
     def __del__(self):
         self.send_request("post", "auth/logout")
 
+    @staticmethod
+    def on_error(error_message: str):
+        raise requests.HTTPError(f"I am not ok: {error_message}")
+
     def send_request(
         self,
         method: str,
         endpoint: str,
         req_auth: bool = True,
-        suppress_error: bool = False,
+        on_error: Callable[[str | None], None] = on_error,
         **kwargs,
     ) -> dict:
         kwargs |= {"method": method, "url": f"{self.API_URL}/{endpoint}"}
@@ -48,8 +52,8 @@ class MangaDexAPI(metaclass=Singleton):
             rate_limit_reset = int(response.headers["x-ratelimit-retry-after"])
             sleep(rate_limit_reset - time() + 1)
             response = requests.request(**kwargs)
-        if not response.ok and not suppress_error:
-            raise requests.HTTPError(f"I am not ok: {response.json()['errors']}")
+        if not response.ok:
+            on_error(response.json()["errors"])
         return response.json()
 
     @property
@@ -64,7 +68,7 @@ class MangaDexAPI(metaclass=Singleton):
 
     @property
     def upload_session(self) -> str | None:
-        response = self.send_request("get", "upload", suppress_error=True)
+        response = self.send_request("get", "upload", on_error=lambda: None)
         if response["result"] == "ok":
             return response["data"]["id"]
 
