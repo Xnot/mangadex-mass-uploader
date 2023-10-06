@@ -28,5 +28,8 @@ class ReactiveInfoInput(ChapterInfoInput):
 
     def bind_preview_event(self, dt=0):
         self.ids["input"].bind(
-            text=lambda *args: App.get_running_app().root.ids[self.target_screen].update_preview()
+            text=lambda *args: App.get_running_app()
+            .root.ids["manager"]
+            .get_screen(self.target_screen)
+            .update_preview()
         )

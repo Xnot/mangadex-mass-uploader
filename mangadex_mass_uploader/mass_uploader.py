@@ -41,10 +41,7 @@ class UploaderScreen(AppScreen):
         self.chapters = parse_upload_input(self.iter_info_inputs(), self.selected_files)
         preview_text = ""
         for chapter in self.chapters:
-            preview_text += f"file: {os.path.basename(str(chapter['file']))}\n"
-            for field in ["manga", "groups", "chapter_draft"]:
-                preview_text += f"{field}: {chapter[field]}\n"
-            preview_text += "\n"
+            preview_text += str(chapter)
         if preview_text == "":
             preview_text = "No chapters selected."
         self.set_preview(preview_text)
