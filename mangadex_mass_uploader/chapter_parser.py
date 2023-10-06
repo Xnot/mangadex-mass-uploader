@@ -1,18 +1,56 @@
+import os
 from dataclasses import dataclass
-from itertools import zip_longest
 from typing import Iterable
 
 
 @dataclass
 class Chapter:
-    manga: str
-    groups: list[str]
-    volume: str
-    chapter: str
-    title: str
-    translatedLanguage: str
-    externalUrl: str | None
+    manga_id: str | None
+    group_1_id: str | None
+    group_2_id: str | None
+    group_3_id: str | None
+    group_4_id: str | None
+    group_5_id: str | None
+    volume: str | None
+    chapter: str | None
+    title: str | None
+    language: str | None
+    external_url: str | None
     file: str | None
+
+    @property
+    def groups(self) -> list[str]:
+        return [
+            self.group_1_id,
+            self.group_2_id,
+            self.group_3_id,
+            self.group_4_id,
+            self.group_5_id,
+        ]
+
+    def to_api(self) -> dict:
+        return {
+            "file": self.file,
+            "manga": self.manga_id,
+            "groups": self.groups,
+            "chapter_draft": {
+                "volume": self.volume,
+                "chapter": self.chapter,
+                "title": self.title,
+                "translatedLanguage": self.language,
+                "externalUrl": self.external_url,
+            },
+        }
+
+    def __repr__(self):
+        return (
+            f"--------------------------------------\n"
+            f"file: {os.path.basename(str(self.file))}\n"
+            f"manga: {self.manga_id}\n"
+            f"groups: {[group for group in self.groups if group is not None]}\n"
+            f"vol: {self.volume}, ch: {self.chapter}, title: {self.title}, lang: {self.language}\n"
+            f"ext_url: {self.external_url}\n"
+        )
 
 
 def split_inputs(inputs: Iterable) -> dict[str, list[str]]:
@@ -24,14 +62,10 @@ def split_inputs(inputs: Iterable) -> dict[str, list[str]]:
 
 def parse_upload_input(text_inputs: Iterable, files: list) -> list[Chapter]:
     inputs = split_inputs(text_inputs)
-    file_count = len(files)
-    ext_url_count = len(inputs["external_url"])
-    chapter_count = max(file_count, ext_url_count)
+    chapter_count = max(len(files), *map(len, inputs.values()))
     if not chapter_count:
         return []
-    chapters = {"file": files}
     # if one numerical chapter is inputted, the subsequent chapters are incremented by 1
-    # TODO use float instead of int?
     if len(inputs["chapter"]) == 1 and inputs["chapter"][0].isdigit():
         first_digit = int(inputs["chapter"][0])
         inputs["chapter"] = [
@@ -43,22 +77,12 @@ def parse_upload_input(text_inputs: Iterable, files: list) -> list[Chapter]:
             values = values * chapter_count
         # get rid of invalid/extra inputs
         values = [None if value == "" else value for value in values]
-        values = values[:chapter_count]
-        chapters[field_id] = values
-    # transpose into [{"file": 1, "chapter": 1}, {"file": 2, "chapter": 2}]
-    chapter_dicts = []
-    for chapter in zip_longest(*chapters.values()):
-        ch_dict = {key: value for key, value in zip(chapters.keys(), chapter)}
-        ch_dict["manga"] = ch_dict.pop("manga_id")
-        ch_dict["groups"] = [
-            ch_dict.pop(f"group_{idx}_id") for idx in range(1, 6) if ch_dict[f"group_{idx}_id"]
-        ]
-        ch_dict["chapter_draft"] = {
-            "volume": ch_dict.pop("volume"),
-            "chapter": ch_dict.pop("chapter"),
-            "title": ch_dict.pop("title"),
-            "translatedLanguage": ch_dict.pop("language"),
-            "externalUrl": ch_dict.pop("external_url"),
-        }
-        chapter_dicts.append(ch_dict)
-    return chapter_dicts
+        # pad list to match chapter count
+        values += [None] * (chapter_count - len(values))
+        inputs[field_id] = values
+    # pad file list and add to inputs
+    files += [None] * (chapter_count - len(files))
+    inputs["file"] = files
+    return [
+        Chapter(**{key: val[idx] for key, val in inputs.items()}) for idx in range(chapter_count)
+    ]
