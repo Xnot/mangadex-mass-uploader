@@ -53,7 +53,7 @@ class UploaderScreen(AppScreen):
         for idx, chapter in enumerate(chapters):
             logger.info(f"Uploading chapter {idx + 1}/{len(chapters)}")
             try:
-                MangaDexAPI().upload_chapter(chapter)
+                MangaDexAPI().upload_chapter(chapter.to_api())
             except HTTPError as exception:
                 logger.error(exception)
                 logger.error(f"Could not upload chapter {idx + 1}/{len(chapters)}")
