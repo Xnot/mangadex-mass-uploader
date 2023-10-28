@@ -21,3 +21,9 @@ This script is only tested on Windows.
 5. `poetry run python mass_uploader.py`
 ###  Mac OS
 1. Follow the linux instructions and pray for the best.
+
+<details>
+  <summary>Hopefully the UI looks the same everywhere</summary>
+
+  ![a screenshot of the mangadex-mass-uploader](./mass_uploader_screenshot.png)
+</details>
