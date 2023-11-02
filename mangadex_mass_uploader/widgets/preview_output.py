@@ -12,5 +12,8 @@ class PreviewOutput(ScrollbarView):
         scroll_position = (1 - self.scroll_y) * (self.viewport_size[1] - self.height)
         self.ids["preview_text"].text = value
         # adjust scroll position to new viewport size
-        scroll_position = 1 - scroll_position / (self.viewport_size[1] - self.height)
+        scroll_size = self.viewport_size[1] - self.height
+        if scroll_size == 0:
+            scroll_size = 1
+        scroll_position = 1 - scroll_position / scroll_size
         self.scroll_y = min(max(scroll_position, 0), 1)
