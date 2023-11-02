@@ -12,7 +12,6 @@ from widgets.app_screen import AppScreen
 from widgets.chapter_info_input import ReactiveInfoInput
 from widgets.preview_output import PreviewOutput
 
-# TODO switch to font that supports japanese
 # TODO update spec and throw in py build script
 # TODO add usage section to readme
 # TODO add min height to scroll bars?
