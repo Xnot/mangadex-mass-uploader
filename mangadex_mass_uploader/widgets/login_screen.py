@@ -1,6 +1,6 @@
-import logging
 from sys import argv
 
+from kivy import Logger
 from kivy.clock import mainthread
 from kivy.uix.screenmanager import Screen
 from requests import HTTPError
@@ -17,7 +17,7 @@ class LoginScreen(Screen):
             if "bypass_login" not in argv:
                 MangaDexAPI().login(self.ids["username"].text, self.ids["password"].text)
         except HTTPError as exception:
-            logging.getLogger("api_logger").error(exception)
+            Logger.error(exception)
         else:
             self.leave_login_screen()
 

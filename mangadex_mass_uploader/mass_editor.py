@@ -3,6 +3,7 @@ import logging
 import re
 from typing import Callable
 
+from kivy import Logger
 from kivy.clock import mainthread
 from requests import HTTPError
 
@@ -27,7 +28,7 @@ from widgets.preview_output import PreviewOutput
 # TODO confirmation dialog for delete/disable and cancel button
 # TODO multi group edit is not the same as V3 mass editor
 
-logger = logging.getLogger("api_logger")
+logger = Logger
 
 
 class EditorInfoInput(ReactiveInfoInput):

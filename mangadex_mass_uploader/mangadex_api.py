@@ -4,6 +4,7 @@ from typing import IO, Callable
 from zipfile import ZipFile
 
 import requests
+from kivy import Logger
 from natsort import natsorted
 
 from mangadex_mass_uploader.utils import Singleton
@@ -13,7 +14,7 @@ class MangaDexAPI(metaclass=Singleton):
     API_URL = "https://api.mangadex.org"
 
     def __init__(self):
-        self.logger = self.logger = logging.getLogger("api_logger")
+        self.logger = self.logger = Logger
         self._session_token = None
         self._refresh_token = None
         self._refresh_at = None

@@ -1,5 +1,6 @@
 import logging
 
+from kivy import Logger
 from kivy.clock import mainthread
 from kivy.uix.textinput import TextInput
 
@@ -10,7 +11,7 @@ class LogOutput(ScrollbarView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         handler = APILogHandler(self)
-        api_logger = logging.getLogger("api_logger")
+        api_logger = Logger
         api_logger.addHandler(handler)
         api_logger.setLevel("INFO")
 
