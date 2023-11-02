@@ -31,7 +31,10 @@ class UploaderScreen(AppScreen):
     @threaded
     def select_files(self):
         self.selected_files = filechooser.open_file(
-            title="Chapter archives", multiple=True, filters=["*.zip", "*.cbz", "*"]
+            title="Chapter archives",
+            multiple=True,
+            filters=["*.zip", "*.cbz", "*"],
+            buffer_size=102400,
         )
         self.selected_files = natsorted(self.selected_files)
         self.update_preview()
