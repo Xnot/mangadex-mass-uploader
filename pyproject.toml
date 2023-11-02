@@ -7,7 +7,7 @@ authors = ["Xnot"]
 [tool.poetry.dependencies]
 python = "3.10.*"
 requests = ">=2.28.2"
-plyer = ">=2.1.0"
+plyer = {git = "https://github.com/Xnot/plyer", rev = "win-filechooser-buffer-passthrough"}
 natsort = ">=8.3.0"
 kivy = {git = "https://github.com/Xnot/kivy", rev = "fix/redundant-eventloop-import"}
 
