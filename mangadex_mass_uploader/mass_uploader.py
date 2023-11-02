@@ -1,6 +1,3 @@
-import logging
-import os
-
 from kivy import Logger
 from natsort import natsorted
 from plyer import filechooser

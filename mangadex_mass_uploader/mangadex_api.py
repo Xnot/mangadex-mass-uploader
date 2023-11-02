@@ -1,4 +1,3 @@
-import logging
 from time import sleep, time
 from typing import IO, Callable
 from zipfile import ZipFile
