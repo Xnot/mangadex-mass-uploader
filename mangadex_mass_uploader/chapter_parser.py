@@ -1,10 +1,20 @@
+import functools
 import os
+import re
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Callable, Iterable, Self
+
+from kivy import Logger
+from natsort import natsorted
+from requests import HTTPError
+
+from mangadex_mass_uploader.mangadex_api import MangaDexAPI
 
 
 @dataclass
 class Chapter:
+    id: str | None
+    version: int | None
     manga_id: str
     group_1_id: str | None
     group_2_id: str | None
@@ -20,13 +30,14 @@ class Chapter:
 
     @property
     def groups(self) -> list[str]:
-        return [
+        groups = [
             self.group_1_id,
             self.group_2_id,
             self.group_3_id,
             self.group_4_id,
             self.group_5_id,
         ]
+        return [group for group in groups if group is not None]
 
     def to_api(self) -> dict:
         return {
@@ -42,15 +53,50 @@ class Chapter:
             },
         }
 
-    def __repr__(self):
-        return (
-            f"--------------------------------------\n"
-            f"file: {os.path.basename(str(self.file))}\n"
-            f"manga: {self.manga_id}\n"
-            f"groups: {[group for group in self.groups if group is not None]}\n"
-            f"vol: {self.volume}, ch: {self.chapter}, title: {self.title}, lang: {self.language}\n"
-            f"ext_url: {self.external_url}\n"
+    @classmethod
+    def from_api(cls, chapter: dict) -> Self:
+        groups = [
+            relation["id"]
+            for relation in chapter["relationships"]
+            if relation["type"] == "scanlation_group"
+        ]
+        groups += [None] * (5 - len(groups))
+        return cls(
+            manga_id=[
+                relation["id"]
+                for relation in chapter["relationships"]
+                if relation["type"] == "manga"
+            ][0],
+            group_1_id=groups[0],
+            group_2_id=groups[1],
+            group_3_id=groups[2],
+            group_4_id=groups[3],
+            group_5_id=groups[4],
+            id=chapter["id"],
+            volume=chapter["attributes"]["volume"],
+            chapter=chapter["attributes"]["chapter"],
+            title=chapter["attributes"]["title"],
+            language=chapter["attributes"]["translatedLanguage"],
+            version=chapter["attributes"]["version"],
         )
+
+    def __repr__(self):
+        ch_repr = f"--------------------------------------\n"
+        if self.id is not None:
+            ch_repr += f"id: {self.id}\n"
+        if self.version is not None:
+            ch_repr += f"version: {self.version}\n"
+        if self.file is not None:
+            ch_repr += f"file: {os.path.basename(str(self.file))}\n"
+        if self.external_url is not None:
+            ch_repr += f"ext_url: {self.external_url}\n"
+        ch_repr += (
+            f"manga: {self.manga_id}\n"
+            f"groups: {self.groups}\n"
+            f"vol: {self.volume}, ch: {self.chapter}, "
+            f"title: {self.title}, lang: {self.language}\n"
+        )
+        return ch_repr
 
 
 def split_inputs(inputs: Iterable) -> dict[str, list[str]]:
@@ -86,3 +132,52 @@ def parse_upload_input(text_inputs: Iterable, files: list) -> list[Chapter]:
     return [
         Chapter(**{key: val[idx] for key, val in inputs.items()}) for idx in range(chapter_count)
     ]
+
+
+def parse_edit_filters(text_inputs: Iterable) -> dict[str, None | set[None | str | dict]]:
+    filters = {}
+    for field_id, element in text_inputs:
+        split_values = element.text.split("\n")
+        if len(split_values) == 1 and split_values[0] == "":
+            filters[field_id] = None
+            continue
+        filters[field_id] = {None if value == "" else value for value in split_values}
+        if field_id == "chapter numbers":
+            filters[field_id] = parse_range_filters(filters[field_id])
+    return filters
+
+
+def parse_range_filters(filter_set: set[None | str]) -> dict[str, set[None | str | Callable]]:
+    normal_filters = set()
+    range_filters = set()
+    for entry in filter_set:
+        entry = re.sub(r"\s*", "", entry)
+        try:
+            start, end = natsorted(range_element for range_element in entry.split("-"))
+            range_filters |= {functools.partial(is_in_range, start, end)}
+        except (ValueError, AttributeError):
+            normal_filters |= {re.sub(r"-", "", entry)}
+    return {"normal_filters": normal_filters, "range_filters": range_filters}
+
+
+def is_in_range(start: str, end: str, chapter: None | str) -> bool:
+    if chapter is None:
+        return False
+    # only consider numerical portion at start of string
+    chapter_number = re.match(r"[0-9]+(\.[0-9]+)?", chapter.strip())
+    if chapter_number is None:
+        return False
+    chapter_number = float(chapter_number[0])
+    if "." not in str(end):
+        return float(start) <= chapter_number < int(end) + 1
+    return float(start) <= chapter_number <= float(end)
+
+
+def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
+    filters = parse_edit_filters(text_inputs)
+    try:
+        chapters = MangaDexAPI().get_chapter_list(filters)
+    except HTTPError:
+        Logger.exception(f"Could not get chapters from the API")
+        return []
+    return [Chapter.from_api(chapter) for chapter in chapters]

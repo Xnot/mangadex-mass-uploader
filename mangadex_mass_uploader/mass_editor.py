@@ -1,11 +1,10 @@
-import functools
 import re
-from typing import Callable
 
 from kivy import Logger
 from kivy.clock import mainthread
 from requests import HTTPError
 
+from chapter_parser import Chapter, fetch_chapters
 from mangadex_api import MangaDexAPI
 from utils import threaded, toggle_button
 from widgets.app_screen import AppScreen
@@ -36,92 +35,18 @@ class EditorInfoInput(ReactiveInfoInput):
 class EditSelectionScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.selected_chapters = []
+        self.selected_chapters: list[Chapter] = []
 
     def clear_inputs(self):
         self.selected_chapters = []
 
-    @staticmethod
-    def parse_filter(value: str) -> None | set[None | str]:
-        split_values = value.split("\n")
-        if len(split_values) == 1 and split_values[0] == "":
-            return None
-        split_values = [None if value == "" else value for value in split_values]
-        return set(split_values)
-
-    @staticmethod
-    def is_in_range(start: float, end: float, chapter: None | str) -> bool:
-        if chapter is None:
-            return False
-        # only consider numerical portion at start of string
-        chapter_number = re.match(r"[0-9]+(\.[0-9]+)?", chapter.strip())
-        if chapter_number is None:
-            return False
-        return start <= float(chapter_number[0]) <= end
-
-    @staticmethod
-    def parse_range_filters(
-        filter_set: None | set[None | str],
-    ) -> None | dict[str, set[None | str | Callable]]:
-        if filter_set is None:
-            return None
-        normal_filters = set()
-        range_filters = set()
-        for entry in filter_set:
-            try:
-                start, end = sorted(float(endpoint) for endpoint in entry.split("-"))
-                range_filters |= {functools.partial(EditSelectionScreen.is_in_range, start, end)}
-            except (ValueError, AttributeError):
-                normal_filters |= {entry}
-        return {"normal_filters": normal_filters, "range_filters": range_filters}
-
-    def fetch_chapters(self):
-        filters = {}
-        for field_id, element in self.iter_info_inputs():
-            filters[field_id] = self.parse_filter(element.text)
-        filters["chapter numbers"] = self.parse_range_filters(filters["chapter numbers"])
-        try:
-            chapters = MangaDexAPI().get_chapter_list(filters)
-        except HTTPError as exception:
-            logger.error(exception)
-            logger.error(f"Could not get chapters from the API")
-            chapters = []
-        # flatten dicts
-        chapter_dicts = []
-        for chapter in chapters:
-            manga = [
-                relation["id"]
-                for relation in chapter["relationships"]
-                if relation["type"] == "manga"
-            ][0]
-            groups = [
-                relation["id"]
-                for relation in chapter["relationships"]
-                if relation["type"] == "scanlation_group"
-            ]
-            ch_dict = {
-                "id": chapter["id"],
-                "manga": manga,
-                "groups": groups,
-                "volume": chapter["attributes"]["volume"],
-                "chapter": chapter["attributes"]["chapter"],
-                "title": chapter["attributes"]["title"],
-                "translatedLanguage": chapter["attributes"]["translatedLanguage"],
-                "version": chapter["attributes"]["version"],
-            }
-            chapter_dicts.append(ch_dict)
-        self.selected_chapters = chapter_dicts
-
     @threaded
     @toggle_button("update_preview_button")
     def update_preview(self):
-        self.fetch_chapters()
+        self.selected_chapters = fetch_chapters(self.iter_info_inputs())
         preview_text = ""
         for chapter in self.selected_chapters:
-            chapter = chapter.copy()
-            for field in ["id", "manga", "groups"]:
-                preview_text += f"{field}: {chapter.pop(field)}\n"
-            preview_text += f"{chapter}\n\n"
+            preview_text += str(chapter)
         if preview_text == "":
             preview_text = "No chapters selected."
         self.set_preview(preview_text)
