@@ -5,7 +5,7 @@ from typing import Iterable
 
 @dataclass
 class Chapter:
-    manga_id: str | None
+    manga_id: str
     group_1_id: str | None
     group_2_id: str | None
     group_3_id: str | None
@@ -14,7 +14,7 @@ class Chapter:
     volume: str | None
     chapter: str | None
     title: str | None
-    language: str | None
+    language: str
     external_url: str | None
     file: str | None
 
