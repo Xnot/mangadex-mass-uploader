@@ -3,11 +3,12 @@ import functools
 import os
 import re
 from dataclasses import dataclass
-from typing import Callable, Iterable, Self
+from typing import Callable, Iterable
 
 from kivy import Logger
 from natsort import natsorted
 from requests import HTTPError
+from typing_extensions import Self
 
 from mangadex_mass_uploader.mangadex_api import MangaDexAPI
 

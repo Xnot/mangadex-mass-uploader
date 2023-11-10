@@ -3,12 +3,12 @@ from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
 
-from chapter_parser import Chapter, parse_upload_input
-from mangadex_api import MangaDexAPI
+from mangadex_mass_uploader.chapter_parser import Chapter, parse_upload_input
+from mangadex_mass_uploader.mangadex_api import MangaDexAPI
+from mangadex_mass_uploader.utils import threaded, toggle_button
 from mangadex_mass_uploader.widgets.app_screen import AppScreen
 from mangadex_mass_uploader.widgets.chapter_info_input import ReactiveInfoInput
 from mangadex_mass_uploader.widgets.preview_output import PreviewOutput
-from utils import threaded, toggle_button
 
 logger = Logger
 
