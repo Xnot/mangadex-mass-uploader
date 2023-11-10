@@ -1,7 +1,4 @@
 # -*- mode: python ; coding: utf-8 -*-
-import PyInstaller.config
-PyInstaller.config.CONF["workpath"] = "../build"
-PyInstaller.config.CONF["distpath"] = "../dist"
 
 from kivy_deps import sdl2, glew
 

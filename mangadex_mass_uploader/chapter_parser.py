@@ -1,11 +1,11 @@
 import dataclasses
 import functools
+import logging
 import os
 import re
 from dataclasses import dataclass
 from typing import Callable, Iterable
 
-from kivy import Logger
 from natsort import natsorted
 from requests import HTTPError
 from typing_extensions import Self
@@ -198,7 +198,7 @@ def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
     try:
         chapters = MangaDexAPI().get_chapter_list(filters)
     except HTTPError:
-        Logger.exception(f"Could not get chapters from the API")
+        logging.getLogger("api_logger").exception(f"Could not get chapters from the API")
         return []
     return [Chapter.from_api(chapter) for chapter in chapters]
 
