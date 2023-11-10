@@ -1,3 +1,4 @@
+import dataclasses
 import functools
 import os
 import re
@@ -199,3 +200,84 @@ def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
         Logger.exception(f"Could not get chapters from the API")
         return []
     return [Chapter.from_api(chapter) for chapter in chapters]
+
+
+def parse_edit_inputs(
+    text_inputs: Iterable, chapter_count: int
+) -> dict[str, list[str | dict[str, str | Callable]]]:
+    edited_values: dict[str, list[str | dict[str, str | Callable]]] = {}
+    for field_id, element in text_inputs:
+        parsed_values: list[str | list] = element.text.split("\n")
+        # groups are split by comma and transposed to separate lists
+        if field_id == "groups":
+            parsed_values = zip(*[value.split(",", 4) for value in parsed_values])
+            for idx, values in enumerate(parsed_values):
+                edited_values[f"group_{idx + 1}_id"] = list(values)
+            continue
+        # extract conditional inputs from volume field
+        if field_id == "volume":
+            cond_vols = [value for value in parsed_values if ":" in value]
+            edited_values["conditional_volume"] = parse_conditional_volumes(cond_vols)
+            parsed_values = [value for value in parsed_values if ":" not in value]
+        edited_values[field_id] = parsed_values
+    for field_id, parsed_values in edited_values.items():
+        if field_id == "conditional_volume":
+            continue
+        # single inputs are repeated
+        if len(parsed_values) == 1:
+            edited_values[field_id] = parsed_values * chapter_count
+        # shorter inputs are padded to chapter_count
+        edited_values[field_id] += [""] * (chapter_count - len(parsed_values))
+    return edited_values
+
+
+def parse_conditional_volumes(text_input: list[str]) -> list[dict[str, str | Callable]]:
+    parsed_input = []
+    for entry in text_input:
+        parsed_entry = {}
+        parsed_entry["new_value"], ch_filter = entry.split(":", 1)
+        # empty inputs are ignored
+        if parsed_entry["new_value"] == "":
+            continue
+        # space is used to set field to null
+        if parsed_entry["new_value"] == " ":
+            parsed_entry["new_value"] = None
+        else:
+            parsed_entry["new_value"] = parsed_entry["new_value"].strip()
+
+        ch_filter = re.sub(r"\s*", "", ch_filter)
+        try:
+            start, end = natsorted(range_element for range_element in ch_filter.split("-", 1))
+            parsed_entry["filter"] = functools.partial(is_in_range, start, end)
+        except ValueError:
+            parsed_entry["filter"] = lambda chapter: chapter == ch_filter
+        parsed_input.append(parsed_entry)
+    return parsed_input
+
+
+def parse_edits(selected_chapters: list[Chapter], text_inputs: Iterable) -> list[Chapter]:
+    edit_values = parse_edit_inputs(text_inputs, len(selected_chapters))
+    # conditional vols are done separately later
+    cond_vols: list[dict[str, str | callable]] = edit_values.pop("conditional_volume")
+    edited_chapters: list[Chapter] = []
+    for chapter in selected_chapters:
+        new_values = {}
+        for field in edit_values:
+            new_value = edit_values[field].pop(0)
+            # empty inputs are ignored
+            if new_value == "":
+                continue
+            # space is used to set field to null
+            if new_value == " ":
+                new_value = None
+            else:
+                new_value = new_value.strip()
+            new_values[field] = new_value
+        edited_chapter = dataclasses.replace(chapter, **new_values)
+        # apply conditional vol changes
+        for entry in cond_vols:
+            if not entry["filter"](chapter.chapter):
+                continue
+            edited_chapter.volume = entry["new_value"]
+        edited_chapters.append(edited_chapter)
+    return edited_chapters
