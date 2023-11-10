@@ -1,7 +1,6 @@
-import kivy_config
-
 from kivy.app import App
 
+import mangadex_mass_uploader.kivy_config
 from mangadex_mass_uploader.mass_editor import EditModificationScreen, EditSelectionScreen
 from mangadex_mass_uploader.mass_uploader import UploaderScreen
 from mangadex_mass_uploader.utils import start_app
