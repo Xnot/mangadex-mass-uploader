@@ -13,8 +13,6 @@ from mangadex_mass_uploader.mangadex_api import MangaDexAPI
 
 @dataclass
 class Chapter:
-    id: str | None
-    version: int | None
     manga_id: str
     group_1_id: str | None
     group_2_id: str | None
@@ -25,8 +23,10 @@ class Chapter:
     chapter: str | None
     title: str | None
     language: str
-    external_url: str | None
-    file: str | None
+    external_url: str | None = None
+    file: str | None = None
+    id: str | None = None
+    version: int | None = None
 
     @property
     def groups(self) -> list[str]:
@@ -40,18 +40,27 @@ class Chapter:
         return [group for group in groups if group is not None]
 
     def to_api(self) -> dict:
-        return {
+        ch_dict = {
+            "id": self.id,
             "file": self.file,
             "manga": self.manga_id,
             "groups": self.groups,
-            "chapter_draft": {
-                "volume": self.volume,
-                "chapter": self.chapter,
-                "title": self.title,
-                "translatedLanguage": self.language,
-                "externalUrl": self.external_url,
-            },
+            "volume": self.volume,
+            "chapter": self.chapter,
+            "title": self.title,
+            "translatedLanguage": self.language,
+            "externalUrl": self.external_url,
+            "version": self.version,
         }
+        if self.id is None:
+            ch_dict.pop("id")
+        if self.file is None:
+            ch_dict.pop("file")
+        if self.external_url is None:
+            ch_dict.pop("externalUrl")
+        if self.version is None:
+            ch_dict.pop("version")
+        return ch_dict
 
     @classmethod
     def from_api(cls, chapter: dict) -> Self:
