@@ -1,0 +1,16 @@
+#:include widgets/scrollbar_view.kv
+
+
+<PreviewOutput>:
+    size_hint_x: 0.65
+    initial_text: ""
+
+    TextInput:
+        id: preview_text
+        text: root.initial_text
+        font_name: "../assets/NotoSansJP-Regular.ttf"
+        multiline: True
+        readonly: True
+        size_hint_x: 1
+        size_hint_y: None
+        height: max(self.minimum_height, root.height)

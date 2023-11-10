@@ -1,0 +1,83 @@
+<LoginLabel@Label>
+    valign: "center"
+    size_hint_x: None
+    size_hint_y: None
+    width: 70
+    height: 30
+
+<LoginInput@TextInput>
+    multiline: False
+    write_tab: False
+    size_hint_y: None
+    height: 30
+
+<LoginScreen>:
+    name: "login_screen"
+
+    GridLayout:
+        cols: 3
+
+        PageLayout:
+        PageLayout:
+        PageLayout:
+        PageLayout:
+
+        AnchorLayout:
+            GridLayout:
+                size_hint_y: None
+                size_hint_x: None
+                height: 300
+                width: 400
+                cols: 1
+
+                AnchorLayout:
+                    Image:
+                        id: login_image
+                        source: "../assets/mangadex.png"
+                        size_hint_x: None
+                        size_hint_y: None
+
+                Label:
+                    text: "Manga[color=FF6740]Dex[/color]"
+                    bold: True
+                    markup: True
+                    font_size: 25
+                    size_hint_y: None
+                    height: 75
+
+                GridLayout:
+                    cols: 2
+                    spacing: (5, 5)
+
+                    LoginLabel:
+                        text: "username:"
+
+                    LoginInput:
+                        id: username
+                        on_text_validate:
+                            root.login()
+
+                    LoginLabel:
+                        text: "password:"
+
+                    LoginInput:
+                        id: password
+                        password: True
+                        on_text_validate:
+                            root.login()
+
+                AnchorLayout:
+                    Button:
+                        id: login_button
+                        text: "Login"
+                        size_hint_x: None
+                        size_hint_y: None
+                        width: 200
+                        height: 50
+                        on_release:
+                            root.login()
+
+        PageLayout:
+        PageLayout:
+        PageLayout:
+        PageLayout:

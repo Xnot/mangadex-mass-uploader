@@ -1,0 +1,9 @@
+import os
+
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
+
+from kivy.config import Config
+
+Config.set("kivy", "desktop", 1)
+Config.set("graphics", "window_state", "maximized")
+Config.set("kivy", "exit_on_escape", 0)

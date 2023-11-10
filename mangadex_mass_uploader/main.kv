@@ -1,0 +1,60 @@
+#:include widgets/login_screen.kv
+#:include widgets/log_output.kv
+#:include mass_uploader.kv
+#:include mass_editor.kv
+
+
+GridLayout:
+    cols: 1
+    rows: 2
+
+    ScreenManager:
+        id: manager
+
+        LoginScreen
+        AppSelectionScreen
+        UploaderScreen
+        EditSelectionScreen
+        EditModificationScreen
+
+    LogOutput
+
+
+<AppSelectionScreen@Screen>:
+    name: "app_selection_screen"
+
+    GridLayout:
+        cols: 2
+        padding: (100, 300)
+        spacing: (50, 0)
+
+        Button:
+            text: "Mass Uploader"
+            font_size: 30
+            background_color: "#34A55C"
+            background_normal: ""
+            on_release:
+                root.manager.current = "uploader_screen"
+            Image:
+                source: "../assets/mass_uploader.png"
+                y: self.parent.y + self.parent.height / 2 + 20
+                x: self.parent.x + self.parent.width / 2 - self.width / 2
+                size_hint_x: None
+                size_hint_y: None
+                width: self.parent.width / 2
+                height: self.parent.height / 3
+        Button:
+            text: "Mass Editor"
+            font_size: 30
+            background_color: "#AFAC3B"
+            background_normal: ""
+            on_release:
+                root.manager.current = "edit_selection_screen"
+            Image:
+                source: "../assets/mass_editor.png"
+                y: self.parent.y + self.parent.height / 2 + 20
+                x: self.parent.x + self.parent.width / 2 - self.width / 2
+                size_hint_x: None
+                size_hint_y: None
+                width: self.parent.width / 2
+                height: self.parent.height / 3
