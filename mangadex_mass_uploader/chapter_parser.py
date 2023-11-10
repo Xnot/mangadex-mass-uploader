@@ -162,24 +162,33 @@ def parse_range_filters(filter_set: set[None | str]) -> dict[str, set[None | str
     for entry in filter_set:
         entry = re.sub(r"\s*", "", entry)
         try:
-            start, end = natsorted(range_element for range_element in entry.split("-"))
+            start, end = natsorted(range_element for range_element in entry.split("-", 1))
             range_filters |= {functools.partial(is_in_range, start, end)}
         except (ValueError, AttributeError):
-            normal_filters |= {re.sub(r"-", "", entry)}
+            normal_filters |= {entry}
     return {"normal_filters": normal_filters, "range_filters": range_filters}
 
 
 def is_in_range(start: str, end: str, chapter: None | str) -> bool:
     if chapter is None:
         return False
-    # only consider numerical portion at start of string
-    chapter_number = re.match(r"[0-9]+(\.[0-9]+)?", chapter.strip())
-    if chapter_number is None:
-        return False
-    chapter_number = float(chapter_number[0])
-    if "." not in str(end):
-        return float(start) <= chapter_number < int(end) + 1
-    return float(start) <= chapter_number <= float(end)
+    # fallbacks for trailing -
+    if start == "":
+        return chapter == end
+    if end == "":
+        return chapter == start
+    # fallbacks for non-numerical bullshit
+    num_pattern = r"[0-9]+(\.[0-9]+)?"
+    chapter_match = re.search(num_pattern, chapter)
+    start_match = re.search(num_pattern, start)
+    end_match = re.search(num_pattern, end)
+    if any([chapter_match is None, start_match is None, end_match is None]):
+        return chapter == start or chapter == end
+    # here we pretend that we don't know math for asdf
+    if "." not in end_match[0]:
+        return float(start_match[0]) <= float(chapter_match[0]) < int(end_match[0]) + 1
+    # real range check, just in case the user actually does the right thing
+    return float(start_match[0]) <= float(chapter_match[0]) <= float(end_match[0])
 
 
 def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
