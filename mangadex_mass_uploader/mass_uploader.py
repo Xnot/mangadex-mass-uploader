@@ -1,4 +1,5 @@
-from kivy import Logger
+import logging
+
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
@@ -10,7 +11,7 @@ from mangadex_mass_uploader.widgets.app_screen import AppScreen
 from mangadex_mass_uploader.widgets.chapter_info_input import ReactiveInfoInput
 from mangadex_mass_uploader.widgets.preview_output import PreviewOutput
 
-logger = Logger
+logger = logging.getLogger("api_logger")
 
 
 class UploaderInfoInput(ReactiveInfoInput):

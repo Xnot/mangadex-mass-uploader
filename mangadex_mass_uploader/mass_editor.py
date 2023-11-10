@@ -1,4 +1,5 @@
-from kivy import Logger
+import logging
+
 from kivy.clock import mainthread
 from requests import HTTPError
 
@@ -23,7 +24,7 @@ from mangadex_mass_uploader.widgets.preview_output import PreviewOutput
 # TODO confirmation dialog for delete/disable and cancel button
 # TODO multi group edit is not the same as V3 mass editor
 
-logger = Logger
+logger = logging.getLogger("api_logger")
 
 
 class EditorInfoInput(ReactiveInfoInput):
