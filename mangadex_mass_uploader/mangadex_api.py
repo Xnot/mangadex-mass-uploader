@@ -68,7 +68,7 @@ class MangaDexAPI(metaclass=Singleton):
 
     @property
     def upload_session(self) -> str | None:
-        response = self.send_request("get", "upload", on_error=lambda: None)
+        response = self.send_request("get", "upload", on_error=lambda error: None)
         if response["result"] == "ok":
             return response["data"]["id"]
 
@@ -83,8 +83,6 @@ class MangaDexAPI(metaclass=Singleton):
         return response["data"][0]["id"]
 
     def commit_upload(self, chapter_draft: dict[str, str], page_order: list[str]) -> None:
-        if chapter_draft["externalUrl"] is None:
-            chapter_draft.pop("externalUrl")
         self.send_request(
             "post",
             f"upload/{self.upload_session}/commit",
@@ -92,10 +90,10 @@ class MangaDexAPI(metaclass=Singleton):
         )
 
     def upload_chapter(self, chapter: dict) -> None:
-        self.start_upload(chapter["manga"], chapter["groups"])
+        self.start_upload(chapter.pop("manga"), chapter.pop("groups"))
         page_order = []
-        if chapter["file"]:
-            with ZipFile(chapter["file"]) as file:
+        if "file" in chapter:
+            with ZipFile(chapter.pop("file")) as file:
                 pages = [
                     page
                     for page in natsorted(file.namelist())
@@ -103,7 +101,7 @@ class MangaDexAPI(metaclass=Singleton):
                 ]
                 for page in pages:
                     page_order.append(self.upload_page(file.open(page)))
-        self.commit_upload(chapter["chapter_draft"], page_order)
+        self.commit_upload(chapter, page_order)
 
     def get_chapter_list(self, filters: dict) -> list[dict]:
         # API gets mad if you request shit with no filters so just return nothing
