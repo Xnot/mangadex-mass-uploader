@@ -108,7 +108,7 @@ class EditModificationScreen(AppScreen):
         for idx, chapter in enumerate(selected_chapters):
             logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
             try:
-                MangaDexAPI().delete_chapter(chapter["id"])
+                MangaDexAPI().delete_chapter(chapter.id)
             except HTTPError as exception:
                 logger.error(exception)
                 logger.error(f"Could not delete chapter {idx + 1}/{len(selected_chapters)}")
@@ -121,7 +121,7 @@ class EditModificationScreen(AppScreen):
         for idx, chapter in enumerate(selected_chapters):
             logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
             try:
-                MangaDexAPI().deactivate_chapter(chapter["id"])
+                MangaDexAPI().deactivate_chapter(chapter.id)
             except HTTPError as exception:
                 logger.error(exception)
                 logger.error(f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}")
