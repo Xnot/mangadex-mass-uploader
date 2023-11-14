@@ -140,6 +140,7 @@ class MangaDexAPI(metaclass=Singleton):
 
     def edit_chapter(self, chapter: dict) -> None:
         chapter.pop("manga")
+        chapter.pop("uploader")
         chapter_id = chapter.pop("id")
         self.send_request("put", f"chapter/{chapter_id}", json=chapter)
 
@@ -148,3 +149,9 @@ class MangaDexAPI(metaclass=Singleton):
 
     def deactivate_chapter(self, chapter_id: str) -> None:
         self.send_request("delete", f"admin/chapter/{chapter_id}/activate")
+
+    def edit_chapter_manga(self, chapter_id: str, manga_id: str) -> None:
+        self.send_request("post", f"admin/chapter/{chapter_id}/move", json={"manga": manga_id})
+
+    def edit_chapter_uploader(self, chapter_id: str, uploader_id: str) -> None:
+        self.send_request("put", f"admin/chapter/{chapter_id}", json={"uploader": uploader_id})

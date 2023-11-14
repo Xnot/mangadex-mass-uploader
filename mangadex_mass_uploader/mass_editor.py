@@ -65,8 +65,8 @@ class EditSelectionScreen(AppScreen):
 class EditModificationScreen(AppScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.selected_chapters = []
-        self.edited_chapters = []
+        self.selected_chapters: list[Chapter] = []
+        self.edited_chapters: list[Chapter] = []
 
     def clear_inputs(self):
         self.edited_chapters = []
@@ -88,15 +88,24 @@ class EditModificationScreen(AppScreen):
     @threaded
     @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
     def mass_edit(self):
-        selected_chapters = self.selected_chapters.copy()
-        edited_chapters = self.edited_chapters.copy()
+        selected_chapters: list[Chapter] = self.selected_chapters.copy()
+        edited_chapters: list[Chapter] = self.edited_chapters.copy()
         for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
-            if old_chapter == new_chapter:
-                continue
             logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
             try:
-                MangaDexAPI().edit_chapter(new_chapter.to_api())
-            except HTTPError as exception:
+                if old_chapter.manga_id != new_chapter.manga_id:
+                    MangaDexAPI().edit_chapter_manga(new_chapter.id, new_chapter.manga_id)
+                    new_chapter.version += 1
+                    old_chapter.version = new_chapter.version
+                    old_chapter.manga_id = new_chapter.manga_id
+                if old_chapter.uploader_id != new_chapter.uploader_id:
+                    MangaDexAPI().edit_chapter_uploader(new_chapter.id, new_chapter.uploader_id)
+                    new_chapter.version += 1
+                    old_chapter.version = new_chapter.version
+                    old_chapter.uploader_id = new_chapter.uploader_id
+                if old_chapter != new_chapter:
+                    MangaDexAPI().edit_chapter(new_chapter.to_api())
+            except Exception as exception:
                 logger.error(exception)
                 logger.error(f"Could not edit chapter {idx + 1}/{len(edited_chapters)}")
         logger.info(f"Done")
