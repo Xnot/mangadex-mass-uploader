@@ -162,11 +162,11 @@ def parse_range_filters(filter_set: set[None | str]) -> dict[str, set[None | str
     normal_filters = set()
     range_filters = set()
     for entry in filter_set:
-        entry = re.sub(r"\s*", "", entry)
         try:
+            entry = re.sub(r"\s*", "", entry)
             start, end = natsorted(range_element for range_element in entry.split("-", 1))
             range_filters |= {functools.partial(is_in_range, start, end)}
-        except (ValueError, AttributeError):
+        except (ValueError, TypeError):
             normal_filters |= {entry}
     return {"normal_filters": normal_filters, "range_filters": range_filters}
 
