@@ -29,6 +29,7 @@ class Chapter:
     file: str | None = None
     id: str | None = None
     version: int | None = None
+    uploader_id: str | None = None
 
     @property
     def groups(self) -> list[str]:
@@ -46,6 +47,7 @@ class Chapter:
             "id": self.id,
             "file": self.file,
             "manga": self.manga_id,
+            "uploader": self.uploader_id,
             "groups": self.groups,
             "volume": self.volume,
             "chapter": self.chapter,
@@ -54,14 +56,16 @@ class Chapter:
             "externalUrl": self.external_url,
             "version": self.version,
         }
-        if self.id is None:
-            ch_dict.pop("id")
-        if self.file is None:
-            ch_dict.pop("file")
         if self.external_url is None:
             ch_dict.pop("externalUrl")
+        if self.file is None:
+            ch_dict.pop("file")
+        if self.id is None:
+            ch_dict.pop("id")
         if self.version is None:
             ch_dict.pop("version")
+        if self.uploader_id is None:
+            ch_dict.pop("uploader_id")
         return ch_dict
 
     @classmethod
@@ -77,6 +81,11 @@ class Chapter:
                 relation["id"]
                 for relation in chapter["relationships"]
                 if relation["type"] == "manga"
+            ][0],
+            uploader_id=[
+                relation["id"]
+                for relation in chapter["relationships"]
+                if relation["type"] == "user"
             ][0],
             group_1_id=groups[0],
             group_2_id=groups[1],
@@ -101,6 +110,8 @@ class Chapter:
             ch_repr += f"file: {os.path.basename(str(self.file))}\n"
         if self.external_url is not None:
             ch_repr += f"ext_url: {self.external_url}\n"
+        if self.uploader_id is not None:
+            ch_repr += f"uploader: {self.uploader_id}\n"
         ch_repr += (
             f"manga: {self.manga_id}\n"
             f"groups: {self.groups}\n"
