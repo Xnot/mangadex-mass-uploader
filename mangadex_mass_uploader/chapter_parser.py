@@ -65,7 +65,7 @@ class Chapter:
         if self.version is None:
             ch_dict.pop("version")
         if self.uploader_id is None:
-            ch_dict.pop("uploader_id")
+            ch_dict.pop("uploader")
         return ch_dict
 
     @classmethod
