@@ -1,15 +1,16 @@
-<LoginLabel@Label>
-    valign: "center"
+<SavedLoginButton@Button>
     size_hint_x: None
     size_hint_y: None
-    width: 70
-    height: 30
+    width: 300
+    height: 50
+    background_color: "#5c96b5ff"
+    background_normal: ""
 
 <LoginInput@TextInput>
     multiline: False
     write_tab: False
     size_hint_y: None
-    height: 30
+    height: 34
 
 <LoginScreen>:
     name: "login_screen"
@@ -20,15 +21,20 @@
         PageLayout:
         PageLayout:
         PageLayout:
-        PageLayout:
+        StackLayout:
+            id: saved_login_container
+            padding: (20, 0, 0, 0)
+            spacing: 5
+
 
         AnchorLayout:
-            GridLayout:
+            BoxLayout:
+                orientation: "vertical"
                 size_hint_y: None
                 size_hint_x: None
-                height: 300
+                height: 400
                 width: 400
-                cols: 1
+                spacing: 7
 
                 AnchorLayout:
                     Image:
@@ -45,26 +51,42 @@
                     size_hint_y: None
                     height: 75
 
-                GridLayout:
-                    cols: 2
-                    spacing: (5, 5)
+                LoginInput:
+                    id: username
+                    hint_text: "username"
+                    on_text_validate:
+                        root.login()
 
-                    LoginLabel:
-                        text: "username:"
+                LoginInput:
+                    id: password
+                    hint_text: "password"
+                    password: True
+                    on_text_validate:
+                        root.login()
 
-                    LoginInput:
-                        id: username
-                        on_text_validate:
-                            root.login()
+                LoginInput:
+                    id: client_id
+                    hint_text: "client_id"
+                    on_text_validate:
+                        root.login()
 
-                    LoginLabel:
-                        text: "password:"
+                LoginInput:
+                    id: client_secret
+                    hint_text: "client_secret"
+                    password: True
+                    on_text_validate:
+                        root.login()
 
-                    LoginInput:
-                        id: password
-                        password: True
-                        on_text_validate:
-                            root.login()
+                BoxLayout:
+                    padding: (0, 0, 280, 0)
+                    spacing: 5
+
+                    CheckBox:
+                        id: remember_me
+                        active: True
+
+                    Label:
+                        text: "remember me"
 
                 AnchorLayout:
                     Button:

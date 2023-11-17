@@ -1,4 +1,6 @@
+import json
 import logging
+import os
 from time import sleep, time
 from typing import IO, Callable
 from zipfile import ZipFile
@@ -11,26 +13,62 @@ from mangadex_mass_uploader.utils import Singleton
 
 class MangaDexAPI(metaclass=Singleton):
     API_URL = "https://api.mangadex.org"
+    AUTH_URL = "https://auth.mangadex.org/realms/mangadex/protocol/openid-connect"
 
     def __init__(self):
         self.logger = logging.getLogger("api_logger")
+        self._client_id = None
+        self._client_secret = None
         self._session_token = None
         self._refresh_token = None
         self._refresh_at = None
 
-    def login(self, username: str, password: str):
+    def login(
+        self, username: str, password: str, client_id: str, client_secret: str, remember_me: str
+    ):
         token = self.send_request(
             "post",
-            "auth/login",
+            "token",
             False,
-            json={"username": username, "password": password},
+            auth_url=True,
+            data={
+                "grant_type": "password",
+                "username": username,
+                "password": password,
+                "client_id": client_id,
+                "client_secret": client_secret,
+            },
         )
-        self._session_token = token["token"]["session"]
-        self._refresh_token = token["token"]["refresh"]
-        self._refresh_at = time() + 880
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._session_token = token["access_token"]
+        self._refresh_token = token["refresh_token"]
+        self._refresh_at = time() + token["expires_in"] - 5
+        if remember_me:
+            self.save_login(username)
 
-    def __del__(self):
-        self.send_request("post", "auth/logout")
+    def save_login(self, file_name: str):
+        os.makedirs(".logins", exist_ok=True)
+        with open(f".logins/{file_name}.json", "w") as file:
+            json.dump(
+                {
+                    "refresh_token": self._refresh_token,
+                    "client_id": self._client_id,
+                    "client_secret": self._client_secret,
+                },
+                file,
+            )
+
+    def load_login(self, file_name: str):
+        with open(f".logins/{file_name}.json", "r") as file:
+            creds = json.load(file)
+            self._refresh_token = creds["refresh_token"]
+            self._client_id = creds["client_id"]
+            self._client_secret = creds["client_secret"]
+        self._refresh_at = 0
+        # update refresh token and re-save
+        _ = self.session_token
+        self.save_login(file_name)
 
     @staticmethod
     def on_error(error_message: str):
@@ -42,9 +80,11 @@ class MangaDexAPI(metaclass=Singleton):
         endpoint: str,
         req_auth: bool = True,
         on_error: Callable[[str | None], None] = on_error,
+        auth_url: bool = False,
         **kwargs,
     ) -> dict:
-        kwargs |= {"method": method, "url": f"{self.API_URL}/{endpoint}"}
+        api_url = self.AUTH_URL if auth_url else self.API_URL
+        kwargs |= {"method": method, "url": f"{api_url}/{endpoint}"}
         if req_auth:
             kwargs |= {"headers": {"Authorization": f"Bearer {self.session_token}"}}
         response = requests.request(**kwargs)
@@ -53,17 +93,31 @@ class MangaDexAPI(metaclass=Singleton):
             sleep(rate_limit_reset - time() + 1)
             response = requests.request(**kwargs)
         if not response.ok:
-            on_error(response.json()["errors"])
+            error_text = response.json()
+            error_text = error_text.get(
+                "errors", error_text.get("error_description", error_text.get("error"))
+            )
+            on_error(error_text)
         return response.json()
 
     @property
     def session_token(self) -> str:
         if time() > self._refresh_at:
-            response = self.send_request(
-                "post", "auth/refresh", False, json={"token": self._refresh_token}
+            token = self.send_request(
+                "post",
+                "token",
+                False,
+                auth_url=True,
+                data={
+                    "grant_type": "refresh_token",
+                    "refresh_token": self._refresh_token,
+                    "client_id": self._client_id,
+                    "client_secret": self._client_secret,
+                },
             )
-            self._session_token = response["token"]["session"]
-            self._refresh_at = time() + 880
+            self._session_token = token["access_token"]
+            self._refresh_token = token["refresh_token"]
+            self._refresh_at = time() + token["expires_in"] - 5
         return self._session_token
 
     @property
