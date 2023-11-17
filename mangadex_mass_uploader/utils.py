@@ -39,6 +39,21 @@ def toggle_button(button_ids: str | list[str]) -> callable:
     return button_toggle_decorator
 
 
+def toggle_cancel(button_id: str) -> callable:
+    def cancel_toggle_decorator(method: callable) -> callable:
+        def decorated_method(self, *args, **kwargs):
+            button = self.ids[button_id]
+            self.place_cancel_button(button)
+            try:
+                method(self, *args, **kwargs)
+            finally:
+                self.remove_cancel_button(button)
+
+        return decorated_method
+
+    return cancel_toggle_decorator
+
+
 class Singleton(type):
     _instances = {}
 
