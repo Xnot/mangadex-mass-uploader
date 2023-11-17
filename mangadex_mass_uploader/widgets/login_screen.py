@@ -16,7 +16,7 @@ class SavedLoginButton(Button):
         self.login_screen = login_screen
         super().__init__(**kwargs)
 
-    def on_press(self):
+    def on_release(self):
         try:
             MangaDexAPI().load_login(self.text)
         except HTTPError as exception:
