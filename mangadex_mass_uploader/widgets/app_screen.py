@@ -23,3 +23,7 @@ class AppScreen(Screen):
             element.text = ""
         self.clear_inputs()
         self.update_preview()
+
+    @mainthread
+    def return_to_app_selection(self):
+        self.manager.current = "app_selection_screen"
