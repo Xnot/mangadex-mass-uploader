@@ -54,7 +54,7 @@
                 Button:
                     id: clear_all_button
                     text: "clear all"
-                    background_color: "#e5cf4cff"
+                    background_color: "#c1a257ff"
                     background_normal: ""
                     on_release:
                         root.clear_all_fields()
@@ -92,11 +92,11 @@
         cols: 2
 
         GridLayout:
-            id: "input_container"
+            id: input_container
             cols: 1
 
             GridLayout:
-                id: "chapter_input_container"
+                id: chapter_input_container
                 cols: 2
 
                 # ids here have to match attributes in the Chapter class
@@ -121,17 +121,16 @@
                 EditorInfoInput:
                     id: uploader_id
                     label: "uploader ids"
-            GridLayout:
-                id: "buttons_container"
-                cols: 5
+            BoxLayout:
+                id: buttons_container
                 size_hint_y: 0.15
                 padding: (15, 25)
-                spacing: (15, 0)
+                spacing: 15
 
                 Button:
                     id: return_to_selector_button
                     text: "return to selection"
-                    background_color: "#9E5562ff"
+                    background_color: "#ffbb66ff"
                     background_normal: ""
                     on_release:
                         root.return_to_selector()
