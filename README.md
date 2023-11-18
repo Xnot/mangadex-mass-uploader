@@ -65,3 +65,10 @@ line.
 9. Multiple groups can be added to a single chapter by comma-separating them.
 10. In the volume field, you can also assign volume numbers to a specific chapter number or range like `1:1-5` to assign
 volume 1 to all chapters between 1 and 5.
+
+### Configuration
+After running the app once, a config file will be created at `<HOME_DIRECTORY>/.md_mass_uploader/config.ini`
+(`C:/Users/<USERNAME>` on windows). You may edit this file to change things such as the initial window size and
+position. Check the
+[kivy documentation](https://kivy.org/doc/stable/api-kivy.config.html#available-configuration-tokens) for an explanation
+of the available options.
