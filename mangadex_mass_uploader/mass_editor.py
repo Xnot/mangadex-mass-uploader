@@ -9,19 +9,11 @@ from mangadex_mass_uploader.widgets.app_screen import AppScreen
 from mangadex_mass_uploader.widgets.chapter_info_input import ReactiveInfoInput
 from mangadex_mass_uploader.widgets.preview_output import PreviewOutput
 
-# TODO update spec and throw in py build script
-# TODO add usage section to readme
 # TODO add min height to scroll bars?
 # TODO text scaling
-# TODO not fullscreen?
-# TODO edit manga & uploader fields
 # TODO add debug flag for prefills
 # TODO pipeline with auto build and release
-# TODO add discord hook or bot to auto-post releases
 # TODO improved logging thing with revert logic
-# TODO upload session checking probably broke
-# TODO confirmation dialog for delete/disable and cancel button
-# TODO multi group edit is not the same as V3 mass editor
 
 logger = Logger
 
