@@ -1,83 +1,94 @@
-<LoginLabel@Label>
-    valign: "center"
+<SavedLoginButton@Button>
     size_hint_x: None
     size_hint_y: None
-    width: 70
-    height: 30
+    width: 200
+    height: 50
+    background_color: "#5c96b5ff"
+    background_normal: ""
 
 <LoginInput@TextInput>
     multiline: False
     write_tab: False
     size_hint_y: None
-    height: 30
+    height: 34
 
 <LoginScreen>:
     name: "login_screen"
 
-    GridLayout:
-        cols: 3
+    AnchorLayout:
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            size_hint_x: None
+            height: 400
+            width: 500
+            spacing: 7
 
-        PageLayout:
-        PageLayout:
-        PageLayout:
-        PageLayout:
+            AnchorLayout:
+                Image:
+                    id: login_image
+                    source: "../assets/mangadex.png"
+                    size_hint_x: None
+                    size_hint_y: None
 
-        AnchorLayout:
-            GridLayout:
+            Label:
+                text: "Manga[color=FF6740]Dex[/color]"
+                bold: True
+                markup: True
+                font_size: 25
                 size_hint_y: None
-                size_hint_x: None
-                height: 300
-                width: 400
-                cols: 1
+                height: 75
 
-                AnchorLayout:
-                    Image:
-                        id: login_image
-                        source: "../assets/mangadex.png"
-                        size_hint_x: None
-                        size_hint_y: None
+            LoginInput:
+                id: username
+                hint_text: "username"
+                on_text_validate:
+                    root.login()
+
+            LoginInput:
+                id: password
+                hint_text: "password"
+                password: True
+                on_text_validate:
+                    root.login()
+
+            LoginInput:
+                id: client_id
+                hint_text: "client_id"
+                on_text_validate:
+                    root.login()
+
+            LoginInput:
+                id: client_secret
+                hint_text: "client_secret"
+                password: True
+                on_text_validate:
+                    root.login()
+
+            BoxLayout:
+                padding: (0, 0, 380, 0)
+                spacing: 5
+
+                CheckBox:
+                    id: remember_me
+                    active: True
 
                 Label:
-                    text: "Manga[color=FF6740]Dex[/color]"
-                    bold: True
-                    markup: True
-                    font_size: 25
+                    text: "remember me"
+
+            StackLayout:
+                id: login_button_container
+                padding: (10, 0, 0, 0)
+                spacing: 7
+
+                Button:
+                    id: login_button
+                    text: "Login"
+                    size_hint_x: None
                     size_hint_y: None
-                    height: 75
-
-                GridLayout:
-                    cols: 2
-                    spacing: (5, 5)
-
-                    LoginLabel:
-                        text: "username:"
-
-                    LoginInput:
-                        id: username
-                        on_text_validate:
-                            root.login()
-
-                    LoginLabel:
-                        text: "password:"
-
-                    LoginInput:
-                        id: password
-                        password: True
-                        on_text_validate:
-                            root.login()
-
-                AnchorLayout:
-                    Button:
-                        id: login_button
-                        text: "Login"
-                        size_hint_x: None
-                        size_hint_y: None
-                        width: 200
-                        height: 50
-                        on_release:
-                            root.login()
-
-        PageLayout:
-        PageLayout:
-        PageLayout:
-        PageLayout:
+                    width: 200
+                    height: 50
+                    background_color: "#666666ff"
+                    background_normal: ""
+                    on_release:
+                        root.login()

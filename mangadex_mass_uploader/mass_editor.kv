@@ -37,12 +37,19 @@
                 ChapterInfoInput:
                     id: chapter numbers
                     label: "chapter"
-            GridLayout:
+            BoxLayout:
                 id: buttons_container
-                cols: 3
                 size_hint_y: 0.15
                 padding: (20, 25)
-                spacing: (25, 0)
+                spacing: 25
+
+                Button:
+                    id: return_to_app_selection_button
+                    text: "return"
+                    background_color: "#ffbb66ff"
+                    background_normal: ""
+                    on_release:
+                        root.return_to_app_selection()
 
                 Button:
                     id: clear_all_button
@@ -68,15 +75,19 @@
         PreviewOutput:
             id: preview
             initial_text:
-                """Choose chapters to edit using the filters in this screen.
-                Manga and uploader can only take 1 input, the others are 1 per line.
-                Filters left empty will not be used. To filter by NULL volumes, leave an extra empty line.
-                Use the preview button to see what the current filters are selecting.
-                Confirm the selection to go to the editing screen.
-                On the editing screen, each line will edit each chapter in order. Empty lines will be skipped. If you want to erase a value, use a space.
-                Entering a single line will use that value for all selected chapters. If you want to avoid that, leave an extra empty line.
-                Multiple groups can be added to a single chapter by comma-separating them.
-                You can also assign volume numbers to a specific chapter number or range of chapters by using "1:1-5" for example to assign volume 1 to all chapters between 1 and 5."""
+                """1. Choose chapters to edit using the filters in the initial screen.
+                2. Manga and uploader can only take 1 input, the others are 1 per line (blame the API).
+                3. Filters left empty will not be used. To filter by NULL values, leave an extra empty line.
+                4. The chapter filter supports ranges, like "1-5" to select all chapters between 1 and 5.
+                5. Use the preview button to see what the current filters are selecting.
+                6. Confirm the selection to go to the editing screen.
+                7. On the editing screen, each line will edit each chapter in the order they appear. Empty lines will be skipped. If you
+                want to erase a value, use a space. The preview will update according to the edited values.
+                8. Entering a single line will use that value for all selected chapters. If you want to avoid that, leave an extra empty
+                line.
+                9. Multiple groups can be added to a single chapter by comma-separating them.
+                10. In the volume field, you can also assign volume numbers to a specific chapter number or range like "1:1-5" to assign
+                volume 1 to all chapters between 1 and 5."""
 
 <EditModificationScreen>:
     name: "edit_modification_screen"
@@ -85,11 +96,11 @@
         cols: 2
 
         GridLayout:
-            id: "input_container"
+            id: input_container
             cols: 1
 
             GridLayout:
-                id: "chapter_input_container"
+                id: chapter_input_container
                 cols: 2
 
                 # ids here have to match attributes in the Chapter class
@@ -114,17 +125,16 @@
                 EditorInfoInput:
                     id: uploader_id
                     label: "uploader ids"
-            GridLayout:
-                id: "buttons_container"
-                cols: 5
+            BoxLayout:
+                id: buttons_container
                 size_hint_y: 0.15
                 padding: (15, 25)
-                spacing: (15, 0)
+                spacing: 15
 
                 Button:
                     id: return_to_selector_button
                     text: "return to selection"
-                    background_color: "#9E5562ff"
+                    background_color: "#ffbb66ff"
                     background_normal: ""
                     on_release:
                         root.return_to_selector()

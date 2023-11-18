@@ -14,12 +14,6 @@ def threaded(fun: callable) -> callable:
     return fun_threaded
 
 
-def start_app(app: App):
-    if hasattr(sys, "_MEIPASS"):
-        resource_add_path(os.path.join(sys._MEIPASS))
-    app.run()
-
-
 def toggle_button(button_ids: str | list[str]) -> callable:
     if isinstance(button_ids, str):
         button_ids = [button_ids]
@@ -37,6 +31,21 @@ def toggle_button(button_ids: str | list[str]) -> callable:
         return decorated_method
 
     return button_toggle_decorator
+
+
+def toggle_cancel(button_id: str) -> callable:
+    def cancel_toggle_decorator(method: callable) -> callable:
+        def decorated_method(self, *args, **kwargs):
+            button = self.ids[button_id]
+            self.place_cancel_button(button)
+            try:
+                method(self, *args, **kwargs)
+            finally:
+                self.remove_cancel_button(button)
+
+        return decorated_method
+
+    return cancel_toggle_decorator
 
 
 class Singleton(type):

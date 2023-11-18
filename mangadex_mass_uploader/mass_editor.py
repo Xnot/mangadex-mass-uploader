@@ -1,30 +1,21 @@
-import logging
-
+from kivy import Logger
 from kivy.clock import mainthread
 from requests import HTTPError
 
 from mangadex_mass_uploader.chapter_parser import Chapter, fetch_chapters, parse_edits
 from mangadex_mass_uploader.mangadex_api import MangaDexAPI
-from mangadex_mass_uploader.utils import threaded, toggle_button
+from mangadex_mass_uploader.utils import threaded, toggle_button, toggle_cancel
 from mangadex_mass_uploader.widgets.app_screen import AppScreen
 from mangadex_mass_uploader.widgets.chapter_info_input import ReactiveInfoInput
 from mangadex_mass_uploader.widgets.preview_output import PreviewOutput
 
-# TODO update spec and throw in py build script
-# TODO add usage section to readme
 # TODO add min height to scroll bars?
 # TODO text scaling
-# TODO not fullscreen?
-# TODO edit manga & uploader fields
 # TODO add debug flag for prefills
 # TODO pipeline with auto build and release
-# TODO add discord hook or bot to auto-post releases
 # TODO improved logging thing with revert logic
-# TODO upload session checking probably broke
-# TODO confirmation dialog for delete/disable and cancel button
-# TODO multi group edit is not the same as V3 mass editor
 
-logger = logging.getLogger("api_logger")
+logger = Logger
 
 
 class EditorInfoInput(ReactiveInfoInput):
@@ -86,11 +77,16 @@ class EditModificationScreen(AppScreen):
         self.set_preview(preview_text)
 
     @threaded
-    @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
+    @toggle_cancel("mass_edit_button")
+    @toggle_button(["mass_delete_button", "mass_deactivate_button"])
     def mass_edit(self):
         selected_chapters: list[Chapter] = self.selected_chapters.copy()
         edited_chapters: list[Chapter] = self.edited_chapters.copy()
         for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
+            if self.action_cancelled:
+                logger.info(f"Another day, another disappointment")
+                self.action_cancelled = False
+                break
             logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
             try:
                 if old_chapter.manga_id != new_chapter.manga_id:
@@ -111,10 +107,15 @@ class EditModificationScreen(AppScreen):
         logger.info(f"Done")
 
     @threaded
-    @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
+    @toggle_cancel("mass_delete_button")
+    @toggle_button(["mass_edit_button", "mass_deactivate_button"])
     def mass_delete(self):
         selected_chapters = self.selected_chapters.copy()
         for idx, chapter in enumerate(selected_chapters):
+            if self.action_cancelled:
+                logger.info(f"Another day, another disappointment")
+                self.action_cancelled = False
+                break
             logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
             try:
                 MangaDexAPI().delete_chapter(chapter.id)
@@ -124,10 +125,15 @@ class EditModificationScreen(AppScreen):
         logger.info(f"Done")
 
     @threaded
-    @toggle_button(["mass_edit_button", "mass_delete_button", "mass_deactivate_button"])
+    @toggle_cancel("mass_deactivate_button")
+    @toggle_button(["mass_edit_button", "mass_delete_button"])
     def mass_deactivate(self):
         selected_chapters = self.selected_chapters.copy()
         for idx, chapter in enumerate(selected_chapters):
+            if self.action_cancelled:
+                logger.info(f"Another day, another disappointment")
+                self.action_cancelled = False
+                break
             logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
             try:
                 MangaDexAPI().deactivate_chapter(chapter.id)
