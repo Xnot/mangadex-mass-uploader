@@ -1,7 +1,7 @@
-import logging
 import os
 from sys import argv
 
+from kivy import Logger
 from kivy.clock import Clock, mainthread
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import Screen
@@ -20,7 +20,7 @@ class SavedLoginButton(Button):
         try:
             MangaDexAPI().load_login(self.text)
         except HTTPError as exception:
-            logging.getLogger("api_logger").error(exception)
+            Logger.error(exception)
         else:
             self.login_screen.leave_login_screen()
 
@@ -49,7 +49,7 @@ class LoginScreen(Screen):
                     self.ids["remember_me"].active,
                 )
         except HTTPError as exception:
-            logging.getLogger("api_logger").error(exception)
+            Logger.error(exception)
         else:
             self.leave_login_screen()
 
