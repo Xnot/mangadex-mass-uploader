@@ -14,12 +14,6 @@ def threaded(fun: callable) -> callable:
     return fun_threaded
 
 
-def start_app(app: App):
-    if hasattr(sys, "_MEIPASS"):
-        resource_add_path(os.path.join(sys._MEIPASS))
-    app.run()
-
-
 def toggle_button(button_ids: str | list[str]) -> callable:
     if isinstance(button_ids, str):
         button_ids = [button_ids]
