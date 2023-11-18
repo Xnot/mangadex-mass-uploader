@@ -36,7 +36,7 @@ def toggle_button(button_ids: str | list[str]) -> callable:
 def toggle_cancel(button_id: str) -> callable:
     def cancel_toggle_decorator(method: callable) -> callable:
         def decorated_method(self, *args, **kwargs):
-            button = self.ids[button_id]
+            button = self.ids[button_id].__self__
             self.place_cancel_button(button)
             try:
                 method(self, *args, **kwargs)
