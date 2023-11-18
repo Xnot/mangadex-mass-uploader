@@ -48,8 +48,7 @@ class MangaDexAPI(metaclass=Singleton):
             self.save_login(username)
 
     def save_login(self, file_name: str):
-        os.makedirs(".logins", exist_ok=True)
-        with open(f".logins/{file_name}.json", "w") as file:
+        with open(f"{os.environ['KIVY_HOME']}/logins/{file_name}.json", "w") as file:
             json.dump(
                 {
                     "refresh_token": self._refresh_token,
@@ -60,7 +59,7 @@ class MangaDexAPI(metaclass=Singleton):
             )
 
     def load_login(self, file_name: str):
-        with open(f".logins/{file_name}.json", "r") as file:
+        with open(f"{os.environ['KIVY_HOME']}/logins/{file_name}.json", "r") as file:
             creds = json.load(file)
             self._refresh_token = creds["refresh_token"]
             self._client_id = creds["client_id"]

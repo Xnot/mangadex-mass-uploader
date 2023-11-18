@@ -33,10 +33,8 @@ class LoginScreen(Screen):
         Clock.schedule_once(self.append_saved_logins)
 
     def append_saved_logins(self, _):
-        if not os.path.exists(".logins"):
-            return
-        for file in os.listdir(".logins"):
-            self.ids["saved_login_container"].add_widget(SavedLoginButton(self, text=file[:-5]))
+        for file in os.listdir(f"{os.environ['KIVY_HOME']}/logins"):
+            self.ids["login_button_container"].add_widget(SavedLoginButton(self, text=file[:-5]))
 
     @threaded
     @toggle_button("login_button")
