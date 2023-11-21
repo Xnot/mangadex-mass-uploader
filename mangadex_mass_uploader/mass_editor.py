@@ -1,3 +1,8 @@
+import dataclasses
+import os
+import pickle
+from datetime import datetime
+
 from kivy import Logger
 from kivy.clock import mainthread
 from requests import HTTPError
@@ -80,64 +85,89 @@ class EditModificationScreen(AppScreen):
     @toggle_cancel("mass_edit_button")
     @toggle_button(["mass_delete_button", "mass_deactivate_button"])
     def mass_edit(self):
-        selected_chapters: list[Chapter] = self.selected_chapters.copy()
-        edited_chapters: list[Chapter] = self.edited_chapters.copy()
-        for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chapters, edited_chapters)):
+        selected_chs = self.selected_chapters
+        edited_chs = self.edited_chapters
+
+        # save edit to file
+        with open(
+            f"{os.environ['KIVY_HOME']}/edits/{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.pickle",
+            "wb",
+        ) as file:
+            pickle.dump({"old": selected_chs, "new": edited_chs}, file)
+
+        done = []
+        skipped = []
+        errored = []
+        for idx, (old_chapter, new_chapter) in enumerate(zip(selected_chs, edited_chs)):
+            old_ch: Chapter = dataclasses.replace(old_chapter)
+            new_ch: Chapter = dataclasses.replace(new_chapter)
             if self.action_cancelled:
                 logger.info(f"Another day, another disappointment")
                 self.action_cancelled = False
                 break
-            logger.info(f"Editing chapter {idx + 1}/{len(edited_chapters)}")
             try:
-                if old_chapter.manga_id != new_chapter.manga_id:
-                    MangaDexAPI().edit_chapter_manga(new_chapter.id, new_chapter.manga_id)
-                    new_chapter.version += 1
-                    old_chapter.version = new_chapter.version
-                    old_chapter.manga_id = new_chapter.manga_id
-                if old_chapter.uploader_id != new_chapter.uploader_id:
-                    MangaDexAPI().edit_chapter_uploader(new_chapter.id, new_chapter.uploader_id)
-                    new_chapter.version += 1
-                    old_chapter.version = new_chapter.version
-                    old_chapter.uploader_id = new_chapter.uploader_id
-                if old_chapter != new_chapter:
-                    MangaDexAPI().edit_chapter(new_chapter.to_api())
-            except Exception as exception:
-                logger.error(exception)
-                logger.error(f"Could not edit chapter {idx + 1}/{len(edited_chapters)}")
-        logger.info(f"Done")
+                if old_ch.manga_id != new_ch.manga_id:
+                    logger.info(f"{idx + 1:>4}/{len(edited_chs):<4} - title move: {old_ch.id}")
+                    MangaDexAPI().edit_chapter_manga(new_ch.id, new_ch.manga_id)
+                    new_ch.version += 1
+                    old_ch.version = new_ch.version
+                    # update manga for last equality check
+                    old_ch.manga_id = new_ch.manga_id
+                if old_ch.uploader_id != new_ch.uploader_id:
+                    logger.info(f"{idx + 1:>4}/{len(edited_chs):<4} - uploader move: {old_ch.id}")
+                    MangaDexAPI().edit_chapter_uploader(new_ch.id, new_ch.uploader_id)
+                    new_ch.version += 1
+                    old_ch.version = new_ch.version
+                    # update uploader for last equality check
+                    old_ch.uploader_id = new_ch.uploader_id
+                if old_ch != new_ch:
+                    logger.info(f"{idx + 1:>4}/{len(edited_chs):<4} - chapter edit: {old_ch.id}")
+                    MangaDexAPI().edit_chapter(new_ch.to_api())
+            except HTTPError as exception:
+                logger.error(f"{idx + 1:>4}/{len(edited_chs):<4} - {exception}")
+                errored.append(old_ch.id)
+            else:
+                if old_chapter.version == old_ch.version:
+                    skipped.append(old_ch.id)
+                else:
+                    done.append(old_ch.id)
+        logger.info(f"Done: {len(done)}")
+        logger.info(f"Skipped: {len(skipped)}")
+        logger.info(f"Errored: {len(errored)}")
+        logger.debug(f"Done: {done}")
+        logger.debug(f"Skipped: {skipped}")
+        logger.debug(f"Errored: {errored}")
 
     @threaded
     @toggle_cancel("mass_delete_button")
     @toggle_button(["mass_edit_button", "mass_deactivate_button"])
     def mass_delete(self):
-        selected_chapters = self.selected_chapters.copy()
-        for idx, chapter in enumerate(selected_chapters):
+        selected_chs = self.selected_chapters
+        for idx, chapter in enumerate(selected_chs):
             if self.action_cancelled:
                 logger.info(f"Another day, another disappointment")
                 self.action_cancelled = False
                 break
-            logger.info(f"Deleting chapter {idx + 1}/{len(selected_chapters)}")
+            logger.info(f"{idx + 1:>4}/{len(selected_chs):<4} - chapter delete: {chapter.id}")
             try:
                 MangaDexAPI().delete_chapter(chapter.id)
             except HTTPError as exception:
-                logger.error(exception)
-                logger.error(f"Could not delete chapter {idx + 1}/{len(selected_chapters)}")
+                logger.error(f"{idx + 1:>4}/{len(selected_chs):<4} - {exception}")
         logger.info(f"Done")
 
     @threaded
     @toggle_cancel("mass_deactivate_button")
     @toggle_button(["mass_edit_button", "mass_delete_button"])
     def mass_deactivate(self):
-        selected_chapters = self.selected_chapters.copy()
-        for idx, chapter in enumerate(selected_chapters):
+        selected_chs = self.selected_chapters
+        for idx, chapter in enumerate(selected_chs):
             if self.action_cancelled:
                 logger.info(f"Another day, another disappointment")
                 self.action_cancelled = False
                 break
-            logger.info(f"Deactivating chapter {idx + 1}/{len(selected_chapters)}")
+            logger.info(f"{idx + 1:>4}/{len(selected_chs):<4} - chapter deactivate: {chapter.id}")
             try:
                 MangaDexAPI().deactivate_chapter(chapter.id)
             except HTTPError as exception:
-                logger.error(exception)
-                logger.error(f"Could not deactivate chapter {idx + 1}/{len(selected_chapters)}")
+                logger.error(f"{idx + 1:>4}/{len(selected_chs):<4} - {exception}")
         logger.info(f"Done")

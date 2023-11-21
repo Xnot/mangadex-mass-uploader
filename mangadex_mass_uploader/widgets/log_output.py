@@ -11,9 +11,10 @@ class LogOutput(ScrollbarView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         handler = APILogHandler(self)
+        handler.setLevel("INFO")
         api_logger = Logger
         api_logger.addHandler(handler)
-        api_logger.setLevel("INFO")
+        api_logger.setLevel("DEBUG")
 
 
 class APILogHandler(logging.Handler):
@@ -28,4 +29,7 @@ class APILogHandler(logging.Handler):
 
     @mainthread
     def emit(self, record: logging.LogRecord) -> None:
-        self.output_panel.text += self.format(record)
+        # truncate old logs
+        old_text = self.output_panel.text.split("\n")
+        old_text = "\n".join(old_text[-100:])
+        self.output_panel.text = old_text + self.format(record)
