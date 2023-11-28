@@ -128,7 +128,7 @@ def split_inputs(inputs: Iterable) -> dict[str, list[str]]:
     return inputs_dict
 
 
-def parse_upload_input(text_inputs: Iterable, files: list) -> list[Chapter]:
+def parse_upload_input(text_inputs: Iterable, files: list[str]) -> list[Chapter]:
     inputs = split_inputs(text_inputs)
     chapter_count = max(len(files), *map(len, inputs.values()))
     if not chapter_count:
@@ -149,7 +149,7 @@ def parse_upload_input(text_inputs: Iterable, files: list) -> list[Chapter]:
         values += [None] * (chapter_count - len(values))
         inputs[field_id] = values
     # pad file list and add to inputs
-    files += [None] * (chapter_count - len(files))
+    files = files + [None] * (chapter_count - len(files))
     inputs["file"] = files
     return [
         Chapter(**{key: val[idx] for key, val in inputs.items()}) for idx in range(chapter_count)
