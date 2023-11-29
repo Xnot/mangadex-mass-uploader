@@ -45,7 +45,8 @@ If there are any bugs or you want any features just make a PR so that I don't ac
 
 ### Uploader
 1. Choose files to upload with the 'choose files' button. Files must be `.zip` or `.cbz`.
-2. Insert the chapter information into the respective fields. Each line is one chapter.
+2. Insert the chapter information into the respective fields. Each line is one chapter. For the language field, you must
+use the language codes [as described in the API documentation](https://api.mangadex.org/docs/3-enumerations/#language-codes--localization).
 3. Inputting a single value will use that for all chapters. For chapter number, it'll increment by 1 for each chapter
 instead. If you want to avoid that, leave an extra empty line.
 4. If you want a chapter to have an empty title or whatever, just skip a line.
