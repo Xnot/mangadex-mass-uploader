@@ -123,6 +123,8 @@ class EditModificationScreen(AppScreen):
                 if old_ch != new_ch:
                     logger.info(f"{idx + 1:>4}/{len(edited_chs):<4} - chapter edit: {old_ch.id}")
                     MangaDexAPI().edit_chapter(new_ch.to_api())
+                    new_ch.version += 1
+                    old_ch.version = new_ch.version
             except HTTPError as exception:
                 logger.error(f"{idx + 1:>4}/{len(edited_chs):<4} - {exception}")
                 errored.append(old_ch.id)
