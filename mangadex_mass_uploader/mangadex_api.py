@@ -193,7 +193,7 @@ class MangaDexAPI(metaclass=Singleton):
 
     def edit_chapter(self, chapter: dict) -> None:
         chapter.pop("manga")
-        chapter.pop("uploader")
+        chapter.pop("uploader", None)
         chapter_id = chapter.pop("id")
         self.send_request("put", f"chapter/{chapter_id}", json=chapter)
 

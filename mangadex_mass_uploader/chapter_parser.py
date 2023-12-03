@@ -76,17 +76,17 @@ class Chapter:
             if relation["type"] == "scanlation_group"
         ]
         groups += [None] * (5 - len(groups))
+        uploader_id = [
+            relation["id"] for relation in chapter["relationships"] if relation["type"] == "user"
+        ]
+        uploader_id = uploader_id[0] if len(uploader_id) != 0 else None
         return cls(
             manga_id=[
                 relation["id"]
                 for relation in chapter["relationships"]
                 if relation["type"] == "manga"
             ][0],
-            uploader_id=[
-                relation["id"]
-                for relation in chapter["relationships"]
-                if relation["type"] == "user"
-            ][0],
+            uploader_id=uploader_id,
             group_1_id=groups[0],
             group_2_id=groups[1],
             group_3_id=groups[2],
