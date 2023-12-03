@@ -1,4 +1,5 @@
 from kivy import Logger
+from kivy.clock import mainthread
 from natsort import natsorted
 from plyer import filechooser
 from requests import HTTPError
@@ -28,14 +29,18 @@ class UploaderScreen(AppScreen):
 
     @threaded
     def select_files(self):
+        self.open_filechooser()
+        self.selected_files = natsorted(self.selected_files)
+        self.update_preview()
+
+    @mainthread
+    def open_filechooser(self):
         self.selected_files = filechooser.open_file(
             title="Chapter archives",
             multiple=True,
             filters=["*.zip", "*.cbz", "*"],
             buffer_size=102400,
         )
-        self.selected_files = natsorted(self.selected_files)
-        self.update_preview()
 
     @threaded
     def update_preview(self):

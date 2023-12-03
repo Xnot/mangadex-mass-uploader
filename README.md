@@ -28,7 +28,7 @@ If there are any bugs or you want any features just make a PR so that I don't ac
 4. `poetry install` in the repo folder.
 5. `poetry run python main.py` in the `mangadex_mass_uploader` sub-folder.
 ###  Mac OS
-1. Follow the linux instructions and pray for the best.
+1. Follow the linux instructions, use `poetry install --with mac` instead, and pray for the best.
 
 ## Usage
 ### Creating an API client
