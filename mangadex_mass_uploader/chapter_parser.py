@@ -3,6 +3,7 @@ import functools
 import os
 import re
 from dataclasses import dataclass
+from itertools import zip_longest
 from typing import Callable, Iterable
 
 from kivy import Logger
@@ -222,7 +223,9 @@ def parse_edit_inputs(
         parsed_values: list[str | list] = element.text.split("\n")
         # groups are split by comma and transposed to separate lists
         if field_id == "groups":
-            parsed_values = zip(*[value.split(",", 4) for value in parsed_values])
+            parsed_values = zip_longest(
+                *[value.split(",", 4) for value in parsed_values], fillvalue=""
+            )
             for idx, values in enumerate(parsed_values):
                 edited_values[f"group_{idx + 1}_id"] = list(values)
             continue
