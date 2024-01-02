@@ -191,6 +191,24 @@ class MangaDexAPI(metaclass=Singleton):
             chapter_list = chapter_list_filtered
         return chapter_list
 
+    def get_chapters_by_id(self, chapter_ids: list[str]) -> list[dict]:
+        chapter_list = []
+        if len(chapter_ids) == 0:
+            return chapter_list
+        # some hardcoded params
+        filters = {
+            "limit": 100,
+            "offset": 0,
+            "contentRating[]": ["safe", "suggestive", "erotica", "pornographic"],
+        }
+        # request 100 ids at a time
+        while len(chapter_ids) > 0:
+            filters["ids[]"] = chapter_ids[:100]
+            chapter_ids = chapter_ids[100:]
+            response = self.send_request("get", "chapter", False, params=filters)
+            chapter_list.extend(response["data"])
+        return chapter_list
+
     def edit_chapter(self, chapter: dict) -> None:
         chapter.pop("manga")
         chapter.pop("uploader", None)

@@ -50,7 +50,13 @@
                     background_normal: ""
                     on_release:
                         root.return_to_app_selection()
-
+                Button:
+                    id: restore_backup_button
+                    text: "restore backup"
+                    background_color: "#4974a5ff"
+                    background_normal: ""
+                    on_release:
+                        root.restore_backup()
                 Button:
                     id: clear_all_button
                     text: "clear all"

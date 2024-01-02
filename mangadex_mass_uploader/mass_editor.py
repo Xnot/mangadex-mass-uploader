@@ -5,9 +5,15 @@ from datetime import datetime
 
 from kivy import Logger
 from kivy.clock import mainthread
+from plyer import filechooser
 from requests import HTTPError
 
-from mangadex_mass_uploader.chapter_parser import Chapter, fetch_chapters, parse_edits
+from mangadex_mass_uploader.chapter_parser import (
+    Chapter,
+    fetch_chapters,
+    parse_edits,
+    prepare_chapters_for_restore,
+)
 from mangadex_mass_uploader.mangadex_api import MangaDexAPI
 from mangadex_mass_uploader.utils import threaded, toggle_button, toggle_cancel
 from mangadex_mass_uploader.widgets.app_screen import AppScreen
@@ -57,6 +63,37 @@ class EditSelectionScreen(AppScreen):
         self.manager.current_screen.selected_chapters = self.selected_chapters
         self.manager.current_screen.update_preview()
 
+    def restore_backup(self) -> None:
+        self.choose_backup_file()
+        self.prepare_restore()
+
+    def choose_backup_file(self) -> None:
+        backup_file = filechooser.open_file(
+            title="Edit backups",
+            filters=["*.pickle"],
+            path=f"{os.environ['KIVY_HOME']}/edits/",
+        )
+        if not backup_file:
+            self.selected_chapters = []
+        with open(
+            backup_file[0],
+            "rb",
+        ) as file:
+            self.selected_chapters = pickle.load(file)["old"]
+
+    @threaded
+    def prepare_restore(self) -> None:
+        restored_chapts, current_chapts = prepare_chapters_for_restore(self.selected_chapters)
+        self.selected_chapters = current_chapts
+        self.go_to_editor_and_reverse_fill(restored_chapts)
+
+    @mainthread
+    def go_to_editor_and_reverse_fill(self, restored_chapts: list[Chapter]) -> None:
+        self.manager.current = "edit_modification_screen"
+        self.manager.current_screen.selected_chapters = self.selected_chapters
+        self.manager.current_screen.edited_chapters = restored_chapts
+        self.manager.current_screen.reverse_fill_edit_fields()
+
 
 class EditModificationScreen(AppScreen):
     def __init__(self, **kwargs):
@@ -80,6 +117,22 @@ class EditModificationScreen(AppScreen):
         if preview_text == "":
             preview_text = "No chapters selected."
         self.set_preview(preview_text)
+
+    @mainthread
+    def reverse_fill_edit_fields(self):
+        field_texts = {}
+        for field_id, element in self.iter_info_inputs():
+            field_texts[field_id] = ""
+            for chapter in self.edited_chapters:
+                value = getattr(chapter, field_id)
+                if isinstance(value, list):
+                    value = ",".join(value)
+                if value is None:
+                    value = ""
+                field_texts[field_id] += value + "\n"
+        # apply updates separately at the end to prevent update_preview triggers from interfering
+        for field_id, element in self.iter_info_inputs():
+            element.text = field_texts[field_id]
 
     @threaded
     @toggle_cancel("mass_edit_button")

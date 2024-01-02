@@ -215,6 +215,32 @@ def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
     return [Chapter.from_api(chapter) for chapter in chapters]
 
 
+def fetch_chapters_from_ids(chapter_ids: list[str]) -> list[Chapter]:
+    try:
+        chapters = MangaDexAPI().get_chapters_by_id(chapter_ids)
+    except HTTPError:
+        Logger.exception(f"Could not get chapters from the API")
+        return []
+    return [Chapter.from_api(chapter) for chapter in chapters]
+
+
+def prepare_chapters_for_restore(chapters: list[Chapter]) -> tuple[list[Chapter], list[Chapter]]:
+    # fetch current version of chapts from API and match to restored versions by id
+    chapt_dict = {chapt.id: {"restored": chapt} for chapt in chapters}
+    fetched_chapts = fetch_chapters_from_ids([chapt_id for chapt_id in chapt_dict])
+    for chapt in fetched_chapts:
+        chapt_dict[chapt.id]["current"] = chapt
+    restored_chapts = []
+    current_chapts = []
+    for chapt_pair in chapt_dict.values():
+        # chapter deleted/disabled/failed to fetch, can't restore
+        if "current" not in chapt_pair:
+            continue
+        restored_chapts.append(chapt_pair["restored"])
+        current_chapts.append(chapt_pair["current"])
+    return restored_chapts, current_chapts
+
+
 def parse_edit_inputs(
     text_inputs: Iterable, chapter_count: int
 ) -> dict[str, list[str | dict[str, str | Callable]]]:
