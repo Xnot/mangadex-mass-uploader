@@ -13,9 +13,10 @@ optional = true
 [tool.poetry.dependencies]
 python = "3.10.*"
 requests = ">=2.28.2"
-plyer = {git = "https://github.com/Xnot/plyer", rev = "win-filechooser-buffer-passthrough"}
+plyer = {git = "https://github.com/Xnot/plyer", rev = "master"}
 natsort = ">=8.3.0"
 kivy = ">=2.2.1"
+typing-extensions = "^4.9.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.3.0"
