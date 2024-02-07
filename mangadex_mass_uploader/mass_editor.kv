@@ -40,8 +40,8 @@
             BoxLayout:
                 id: buttons_container
                 size_hint_y: 0.15
-                padding: (20, 25)
-                spacing: 25
+                padding: (self.parent.width / 250, self.parent.height / 150)
+                spacing: self.parent.width / 250
 
                 Button:
                     id: return_to_app_selection_button
@@ -134,8 +134,8 @@
             BoxLayout:
                 id: buttons_container
                 size_hint_y: 0.15
-                padding: (15, 25)
-                spacing: 15
+                padding: (self.parent.width / 250, self.parent.height / 150)
+                spacing: self.parent.width / 250
 
                 Button:
                     id: return_to_selector_button

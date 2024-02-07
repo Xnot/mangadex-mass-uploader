@@ -25,12 +25,12 @@ GridLayout:
 
     GridLayout:
         cols: 2
-        padding: (100, 300)
-        spacing: (50, 0)
+        padding: (self.parent.width / 30, self.parent.height / 10)
+        spacing: (self.parent.width / 30, 0)
 
         Button:
             text: "Mass Uploader"
-            font_size: 30
+            font_size: min(self.parent.height / 25 + 15, self.parent.width / 75 + 15, 40)
             background_color: "#34A55C"
             background_normal: ""
             on_release:
@@ -41,11 +41,11 @@ GridLayout:
                 x: self.parent.x + self.parent.width / 2 - self.width / 2
                 size_hint_x: None
                 size_hint_y: None
-                width: self.parent.width / 2
-                height: self.parent.height / 3
+                width: self.parent.width / 2 if self.parent.width / 2 > 50 else 0
+                height: self.parent.height / 3 if self.parent.height / 3 > 70 else 0
         Button:
             text: "Mass Editor"
-            font_size: 30
+            font_size: min(self.parent.height / 25 + 15, self.parent.width / 75 + 15, 40)
             background_color: "#AFAC3B"
             background_normal: ""
             on_release:
@@ -56,5 +56,5 @@ GridLayout:
                 x: self.parent.x + self.parent.width / 2 - self.width / 2
                 size_hint_x: None
                 size_hint_y: None
-                width: self.parent.width / 2
-                height: self.parent.height / 3
+                width: self.parent.width / 2 if self.parent.width / 2 > 50 else 0
+                height: self.parent.height / 3 if self.parent.height / 3 > 70 else 0
