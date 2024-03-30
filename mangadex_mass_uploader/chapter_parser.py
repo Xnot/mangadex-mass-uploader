@@ -99,6 +99,7 @@ class Chapter:
             title=chapter["attributes"]["title"],
             language=chapter["attributes"]["translatedLanguage"],
             version=chapter["attributes"]["version"],
+            external_url=chapter["attributes"]["externalUrl"],
         )
 
     def __repr__(self):
