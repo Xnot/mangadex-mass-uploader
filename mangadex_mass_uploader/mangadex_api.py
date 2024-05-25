@@ -173,8 +173,12 @@ class MangaDexAPI(metaclass=Singleton):
         chapter_filter = filters.pop("chapter numbers")
         response = self.send_request("get", "chapter", False, params=filters)
         total_chapters = response["total"]
+        if total_chapters > 10_000:
+            self.logger.warn(
+                "There are more than 10,000 chapters selected, only the first 10,000 can be fetched."
+            )
         chapter_list = response["data"]
-        while len(chapter_list) < total_chapters:
+        while len(chapter_list) < total_chapters and filters["offset"] < 10_000 - 100:
             filters["offset"] += 100
             chapter_list.extend(self.send_request("get", "chapter", False, params=filters)["data"])
         # apply chapter number filter
