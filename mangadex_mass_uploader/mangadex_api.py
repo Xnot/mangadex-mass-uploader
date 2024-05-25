@@ -195,6 +195,51 @@ class MangaDexAPI(metaclass=Singleton):
             chapter_list = chapter_list_filtered
         return chapter_list
 
+    def get_unavailable_chapter_list(self, filters: dict) -> list[dict]:
+        # API gets mad if you request shit with no filters so just return nothing
+        if all(value is None for value in filters.values()):
+            return []
+        # some hardcoded params
+        filters["limit"] = 100
+        filters["offset"] = 0
+        # replace None with "none" for volumes
+        if filters["volume[]"] is not None:
+            filters["volume[]"] = [
+                "none" if value is None else value for value in filters["volume[]"]
+            ]
+        # chapter number filter is done client-side since API only accepts 1 chapter
+        chapter_filter = filters.pop("chapter numbers")
+        volume_filter = filters.pop("volume[]")
+        response = self.send_request("get", "admin/chapter", params=filters)
+        total_chapters = response["total"]
+        if total_chapters > 10_000:
+            self.logger.warn(
+                "There are more than 10,000 chapters selected, only the first 10,000 can be fetched."
+            )
+        chapter_list = response["data"]
+        while len(chapter_list) < total_chapters and filters["offset"] < 10_000 - 100:
+            filters["offset"] += 100
+            chapter_list.extend(self.send_request("get", "chapter", False, params=filters)["data"])
+        # apply chapter number filter
+        if chapter_filter is not None:
+            chapter_list_filtered = []
+            for chapter in chapter_list:
+                if chapter["attributes"]["chapter"] in chapter_filter["normal_filters"]:
+                    chapter_list_filtered.append(chapter)
+                    continue
+                for range_check in chapter_filter["range_filters"]:
+                    if range_check(chapter["attributes"]["chapter"]):
+                        chapter_list_filtered.append(chapter)
+                        break
+            chapter_list = chapter_list_filtered
+        if volume_filter is not None:
+            chapter_list_filtered = []
+            for chapter in chapter_list:
+                if chapter["attributes"]["volume"] in volume_filter:
+                    chapter_list_filtered.append(chapter)
+            chapter_list = chapter_list_filtered
+        return chapter_list
+
     def get_chapters_by_id(self, chapter_ids: list[str]) -> list[dict]:
         chapter_list = []
         if len(chapter_ids) == 0:
@@ -224,6 +269,12 @@ class MangaDexAPI(metaclass=Singleton):
 
     def deactivate_chapter(self, chapter_id: str) -> None:
         self.send_request("delete", f"admin/chapter/{chapter_id}/activate")
+
+    def reactivate_chapter(self, chapter_id: str) -> None:
+        self.send_request("post", f"admin/chapter/{chapter_id}/activate")
+
+    def restore_chapter(self, chapter_id: str) -> None:
+        self.send_request("post", f"admin/chapter/{chapter_id}/restore")
 
     def edit_chapter_manga(self, chapter_id: str, manga_id: str) -> None:
         self.send_request("post", f"admin/chapter/{chapter_id}/move", json={"manga": manga_id})

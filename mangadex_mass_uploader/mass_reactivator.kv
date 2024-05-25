@@ -1,0 +1,91 @@
+#:include widgets/chapter_info_input.kv
+#:include widgets/preview_output.kv
+
+
+<ReactivationScreen>:
+    name: "reactivation_screen"
+
+    GridLayout:
+        cols: 2
+
+        GridLayout:
+            id: input_container
+            cols: 1
+
+            GridLayout:
+                id: chapter_input_container
+                cols: 2
+
+                # ids here have to match the API filters
+                ChapterInfoInput:
+                    id: manga
+                    label: "manga id"
+                    multiline: False
+                ChapterInfoInput:
+                    id: uploader
+                    label: "uploader id"
+                    multiline: False
+                ChapterInfoInput:
+                    id: group
+                    label: "group id"
+                    multiline: False
+                ChapterInfoInput:
+                    id: translatedLanguage
+                    label: "language"
+                    multiline: False
+                ChapterInfoInput:
+                    id: volume[]
+                    label: "volume numbers"
+                ChapterInfoInput:
+                    id: chapter numbers
+                    label: "chapters"
+            BoxLayout:
+                id: buttons_container
+                size_hint_y: 0.15
+                padding: (self.parent.width / 250, self.parent.height / 150)
+                spacing: self.parent.width / 250
+
+                Button:
+                    id: return_to_app_selection_button
+                    text: "return"
+                    background_color: "#ffbb66ff"
+                    background_normal: ""
+                    on_release:
+                        root.return_to_app_selection()
+                Button:
+                    id: clear_all_button
+                    text: "clear all"
+                    background_color: "#c1a257ff"
+                    background_normal: ""
+                    on_release:
+                        root.clear_all_fields()
+                Button:
+                    id: update_preview_button
+                    text: "update selection"
+                    background_color: "#998398ff"
+                    background_normal: ""
+                    on_release:
+                        root.update_preview()
+                Button:
+                    id: mass_reactivate_button
+                    text: "reactivate selection"
+                    background_color: "#69b499ff"
+                    background_normal: ""
+                    on_release:
+                        root.mass_reactivate()
+                Button:
+                    id: mass_restore_button
+                    text: "restore selection"
+                    background_color: "##6999b4ff"
+                    background_normal: ""
+                    on_release:
+                        root.mass_restore()
+        PreviewOutput:
+            id: preview
+            initial_text:
+                """1. Choose chapters to reactivate or restore using the filters.
+                2. Manga, uploader, group, and translatedLanguage can only take 1 input, the others are 1 per line.
+                3. Filters left empty will not be used. To filter by NULL values, leave an extra empty line.
+                4. The chapter filter supports ranges, like "1-5" to select all chapters between 1 and 5.
+                5. Use the update selection button to fetch the chapter list and see what was selected.
+                6. Use the reactivate and restore buttons to reactivate/restore the current selection."""

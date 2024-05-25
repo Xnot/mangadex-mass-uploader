@@ -216,6 +216,16 @@ def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
     return [Chapter.from_api(chapter) for chapter in chapters]
 
 
+def fetch_unavailable_chapters(text_inputs: Iterable) -> list[Chapter]:
+    filters = parse_edit_filters(text_inputs)
+    try:
+        chapters = MangaDexAPI().get_unavailable_chapter_list(filters)
+    except HTTPError:
+        Logger.exception(f"Could not get chapters from the API")
+        return []
+    return [Chapter.from_api(chapter) for chapter in chapters]
+
+
 def fetch_chapters_from_ids(chapter_ids: list[str]) -> list[Chapter]:
     try:
         chapters = MangaDexAPI().get_chapters_by_id(chapter_ids)
