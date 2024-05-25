@@ -1,17 +1,19 @@
 import dataclasses
 import functools
+import logging
 import os
 import re
 from dataclasses import dataclass
 from itertools import zip_longest
 from typing import Callable, Iterable
 
-from kivy import Logger
 from natsort import natsorted
 from requests import HTTPError
 from typing_extensions import Self
 
 from mangadex_mass_uploader.mangadex_api import MangaDexAPI
+
+logger = logging.getLogger("main")
 
 
 @dataclass
@@ -211,7 +213,7 @@ def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
     try:
         chapters = MangaDexAPI().get_chapter_list(filters)
     except HTTPError:
-        Logger.exception(f"Could not get chapters from the API")
+        logger.exception(f"Could not get chapters from the API")
         return []
     return [Chapter.from_api(chapter) for chapter in chapters]
 
@@ -221,7 +223,7 @@ def fetch_unavailable_chapters(text_inputs: Iterable) -> list[Chapter]:
     try:
         chapters = MangaDexAPI().get_unavailable_chapter_list(filters)
     except HTTPError:
-        Logger.exception(f"Could not get chapters from the API")
+        logger.exception(f"Could not get chapters from the API")
         return []
     return [Chapter.from_api(chapter) for chapter in chapters]
 
@@ -230,7 +232,7 @@ def fetch_chapters_from_ids(chapter_ids: list[str]) -> list[Chapter]:
     try:
         chapters = MangaDexAPI().get_chapters_by_id(chapter_ids)
     except HTTPError:
-        Logger.exception(f"Could not get chapters from the API")
+        logger.exception(f"Could not get chapters from the API")
         return []
     return [Chapter.from_api(chapter) for chapter in chapters]
 

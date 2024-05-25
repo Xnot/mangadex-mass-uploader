@@ -1,9 +1,9 @@
 import dataclasses
+import logging
 import os
 import pickle
 from datetime import datetime
 
-from kivy import Logger
 from kivy.clock import mainthread
 from plyer import filechooser
 from requests import HTTPError
@@ -20,13 +20,7 @@ from mangadex_mass_uploader.widgets.app_screen import AppScreen
 from mangadex_mass_uploader.widgets.chapter_info_input import ReactiveInfoInput
 from mangadex_mass_uploader.widgets.preview_output import PreviewOutput
 
-# TODO add min height to scroll bars?
-# TODO text scaling
-# TODO add debug flag for prefills
-# TODO pipeline with auto build and release
-# TODO improved logging thing with revert logic
-
-logger = Logger
+logger = logging.getLogger("main")
 
 
 class EditorInfoInput(ReactiveInfoInput):
