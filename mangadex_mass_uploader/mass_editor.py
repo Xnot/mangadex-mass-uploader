@@ -62,22 +62,22 @@ class EditSelectionScreen(AppScreen):
         self.prepare_restore()
 
     def choose_backup_file(self) -> None:
-        backup_file = filechooser.open_file(
+        backup_file: list = filechooser.open_file(
             title="Edit backups",
             filters=["*.pickle"],
             path=os.path.normpath(f"{os.environ['KIVY_HOME']}/edits/"),
         )
         if not backup_file:
             self.selected_chapters = []
-        with open(
-            backup_file[0],
-            "rb",
-        ) as file:
+            return
+        with open(backup_file[0], "rb") as file:
             self.selected_chapters = pickle.load(file)["old"]
 
     @threaded
     def prepare_restore(self) -> None:
         restored_chapts, current_chapts = prepare_chapters_for_restore(self.selected_chapters)
+        if not current_chapts:
+            return
         self.selected_chapters = current_chapts
         self.go_to_editor_and_reverse_fill(restored_chapts)
 
