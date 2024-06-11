@@ -65,7 +65,7 @@ class EditSelectionScreen(AppScreen):
         backup_file = filechooser.open_file(
             title="Edit backups",
             filters=["*.pickle"],
-            path=f"{os.environ['KIVY_HOME']}/edits/",
+            path=os.path.normpath(f"{os.environ['KIVY_HOME']}/edits/"),
         )
         if not backup_file:
             self.selected_chapters = []
