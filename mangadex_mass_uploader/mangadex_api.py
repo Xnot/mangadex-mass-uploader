@@ -123,6 +123,7 @@ class MangaDexAPI(metaclass=Singleton):
     def upload_session(self) -> str | None:
         response = self.send_request("get", "upload", on_error=lambda error: None)
         if response["result"] == "ok":
+            self.logger.debug(f"Upload session ok: {response}")
             return response["data"]["id"]
         self.logger.debug(f"Upload session not ok: {response}")
 
