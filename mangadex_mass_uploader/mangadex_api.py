@@ -22,6 +22,7 @@ class MangaDexAPI(metaclass=Singleton):
         self._session_token: str | None = None
         self._refresh_token: str | None = None
         self._refresh_at: int | float | None = None
+        self._upload_session: str | None = None
 
     def login(
         self, username: str, password: str, client_id: str, client_secret: str, remember_me: str
@@ -122,30 +123,36 @@ class MangaDexAPI(metaclass=Singleton):
             self._refresh_at = time() + token["expires_in"] - 5
         return self._session_token
 
-    @property
-    def upload_session(self) -> str | None:
-        response = self.send_request("get", "upload", on_error=lambda error: None)
+    def get_upload_session(self) -> str | None:
+        response = self.send_request("get", "upload", on_error=self.raise_on_error_bypass_404)
         if response["result"] == "ok":
             self.logger.debug(f"Upload session ok: {response}")
             return response["data"]["id"]
-        self.logger.debug(f"Upload session not ok: {response}")
+        self.logger.debug(f"Upload session not ok (should be 404): {response}")
 
     def start_upload(self, manga: str, groups: list[str]) -> None:
-        if self.upload_session:
-            self.send_request("delete", f"upload/{self.upload_session}")
-        self.send_request("post", "upload/begin", json={"manga": manga, "groups": groups})
+        old_session = self.get_upload_session()
+        if old_session:
+            self.send_request("delete", f"upload/{old_session}")
+        response = self.send_request(
+            "post", "upload/begin", json={"manga": manga, "groups": groups}
+        )
+        self._upload_session = response["data"]["id"]
 
     # TODO batch pages
     def upload_page(self, page: IO[bytes]) -> str:
-        response = self.send_request("post", f"upload/{self.upload_session}", files={"page": page})
+        response = self.send_request(
+            "post", f"upload/{self._upload_session}", files={"page": page}
+        )
         return response["data"][0]["id"]
 
     def commit_upload(self, chapter_draft: dict[str, str], page_order: list[str]) -> None:
         self.send_request(
             "post",
-            f"upload/{self.upload_session}/commit",
+            f"upload/{self._upload_session}/commit",
             json={"chapterDraft": chapter_draft, "pageOrder": page_order},
         )
+        self._upload_session = None
 
     def upload_chapter(self, chapter: dict) -> None:
         self.start_upload(chapter.pop("manga"), chapter.pop("groups"))
