@@ -70,15 +70,20 @@ class MangaDexAPI(metaclass=Singleton):
         self.save_login(file_name)
 
     @staticmethod
-    def on_error(status_code: int, error_message: str | None = None):
-        raise requests.HTTPError(f"I am not ok: {status_code} - {error_message}")
+    def raise_on_error(status_code: int, error_json: dict | None = None) -> None:
+        raise requests.HTTPError(f"I am not ok: {status_code} - {error_json}")
+
+    @staticmethod
+    def raise_on_error_bypass_404(status_code: int, error_json: dict | None = None) -> None:
+        if not status_code == 404:
+            raise requests.HTTPError(f"I am not ok: {status_code} - {error_json}")
 
     def send_request(
         self,
         method: str,
         endpoint: str,
         req_auth: bool = True,
-        on_error: Callable[[int, str | None], None] = on_error,
+        on_error: Callable[[int, dict | None], None] = raise_on_error,
         auth_url: bool = False,
         **kwargs,
     ) -> dict:
@@ -94,11 +99,7 @@ class MangaDexAPI(metaclass=Singleton):
             self.logger.debug(f"ratelimit retrying at {time()}")
             response = requests.request(**kwargs)
         if not response.ok:
-            error_text = response.json()
-            error_text = error_text.get(
-                "errors", error_text.get("error_description", error_text.get("error"))
-            )
-            on_error(response.status_code, error_text)
+            on_error(response.status_code, response.json())
         return response.json()
 
     @property
