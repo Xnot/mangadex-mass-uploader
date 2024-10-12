@@ -17,11 +17,11 @@ class MangaDexAPI(metaclass=Singleton):
 
     def __init__(self):
         self.logger = logging.getLogger("main")
-        self._client_id = None
-        self._client_secret = None
-        self._session_token = None
-        self._refresh_token = None
-        self._refresh_at = None
+        self._client_id: str | None = None
+        self._client_secret: str | None = None
+        self._session_token: str | None = None
+        self._refresh_token: str | None = None
+        self._refresh_at: int | float | None = None
 
     def login(
         self, username: str, password: str, client_id: str, client_secret: str, remember_me: str
