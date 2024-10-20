@@ -231,7 +231,7 @@ class MangaDexAPI(metaclass=Singleton):
         chapter_list = response["data"]
         while len(chapter_list) < total_chapters and filters["offset"] < 10_000 - 100:
             filters["offset"] += 100
-            chapter_list.extend(self.send_request("get", "chapter", False, params=filters)["data"])
+            chapter_list.extend(self.send_request("get", "admin/chapter", params=filters)["data"])
         # apply chapter number filter
         if chapter_filter is not None:
             chapter_list_filtered = []
