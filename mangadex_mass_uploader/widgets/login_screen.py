@@ -23,6 +23,10 @@ class SavedLoginButton(Button):
             MangaDexAPI().load_login(self.text)
         except HTTPError as exception:
             logger.error(exception)
+            # prefill client id and secret for manual login
+            client_creds = MangaDexAPI().client_creds
+            self.login_screen.ids["client_id"].text = client_creds["client_id"]
+            self.login_screen.ids["client_secret"].text = client_creds["client_secret"]
         else:
             self.login_screen.leave_login_screen()
 

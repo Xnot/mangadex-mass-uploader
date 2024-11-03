@@ -123,6 +123,10 @@ class MangaDexAPI(metaclass=Singleton):
             self._refresh_at = time() + token["expires_in"] - 5
         return self._session_token
 
+    @property
+    def client_creds(self):
+        return {"client_id": self._client_id, "client_secret": self._client_secret}
+
     def get_upload_session(self) -> str | None:
         response = self.send_request("get", "upload", on_error=self.raise_on_error_bypass_404)
         if response["result"] == "ok":
