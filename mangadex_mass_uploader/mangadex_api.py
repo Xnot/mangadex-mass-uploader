@@ -179,6 +179,7 @@ class MangaDexAPI(metaclass=Singleton):
         # some hardcoded params
         filters["limit"] = 100
         filters["offset"] = 0
+        filters["includeUnavailable"] = 1
         filters["contentRating[]"] = ["safe", "suggestive", "erotica", "pornographic"]
         # replace None with "none" for volumes
         if filters["volume[]"] is not None:
