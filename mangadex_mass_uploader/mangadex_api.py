@@ -94,9 +94,9 @@ class MangaDexAPI(metaclass=Singleton):
             kwargs |= {"headers": {"Authorization": f"Bearer {self.session_token}"}}
         response = requests.request(**kwargs)
         if response.status_code == 429:
-            rate_limit_reset = int(response.headers["x-ratelimit-retry-after"])
-            self.logger.debug(f"ratelimit hit at {time()}, retry after {rate_limit_reset}")
-            sleep(rate_limit_reset - time() + 1)
+            rate_reset_in = int(response.headers["x-ratelimit-retry-in"])
+            self.logger.debug(f"ratelimit hit at {time()}, retry in {rate_reset_in} seconds")
+            sleep(rate_reset_in + 2)
             self.logger.debug(f"ratelimit retrying at {time()}")
             response = requests.request(**kwargs)
         if not response.ok:
