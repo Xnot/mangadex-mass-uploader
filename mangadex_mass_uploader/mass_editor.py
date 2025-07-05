@@ -38,7 +38,9 @@ class EditSelectionScreen(AppScreen):
     @threaded
     @toggle_button("update_preview_button")
     def update_preview(self):
-        self.selected_chapters = fetch_chapters(self.iter_info_inputs())
+        self.selected_chapters = fetch_chapters(
+            self.iter_info_inputs(), self.ids["includeUnavailable"].active
+        )
         preview_text = ""
         for chapter in self.selected_chapters:
             preview_text += str(chapter)
@@ -48,7 +50,9 @@ class EditSelectionScreen(AppScreen):
 
     @threaded
     def confirm_selection(self):
-        self.selected_chapters = fetch_chapters(self.iter_info_inputs())
+        self.selected_chapters = fetch_chapters(
+            self.iter_info_inputs(), self.ids["includeUnavailable"].active
+        )
         self.go_to_editor()
 
     @mainthread

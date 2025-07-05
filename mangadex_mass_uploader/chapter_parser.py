@@ -208,8 +208,9 @@ def is_in_range(start: str, end: str, chapter: None | str) -> bool:
     return float(start_match[0]) <= float(chapter_match[0]) <= float(end_match[0])
 
 
-def fetch_chapters(text_inputs: Iterable) -> list[Chapter]:
-    filters = parse_edit_filters(text_inputs)
+def fetch_chapters(text_inputs: Iterable, include_unavailable: bool) -> list[Chapter]:
+    filters: dict[str, None | set[None | str | dict] | int] = parse_edit_filters(text_inputs)
+    filters["includeUnavailable"] = int(include_unavailable)
     try:
         chapters = MangaDexAPI().get_chapter_list(filters)
     except HTTPError:

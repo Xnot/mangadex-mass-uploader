@@ -37,6 +37,18 @@
                 ChapterInfoInput:
                     id: chapter numbers
                     label: "chapter"
+                GridLayout:
+                    cols: 2
+
+                    CheckBox:
+                        id: includeUnavailable
+                        size_hint_x: None
+                        active: True
+
+                    Label:
+                        text: "include unavailable"
+                        size_hint_x: None
+
             BoxLayout:
                 id: buttons_container
                 size_hint_y: 0.15
