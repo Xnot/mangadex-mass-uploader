@@ -48,6 +48,17 @@
                 UploaderInfoInput:
                     id: external_url
                     label: "external url"
+                GridLayout:
+                    cols: 2
+
+                    CheckBox:
+                        id: terms_accepted
+                        size_hint_x: None
+                        active: False
+
+                    Label:
+                        text: "I agree to the MD \nterms of service, \ncontent policy, and \nam authorized \nto upload"
+                        size_hint_x: None
             BoxLayout:
                 id: buttons_container
                 size_hint_y: 0.15

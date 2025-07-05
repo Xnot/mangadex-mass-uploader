@@ -52,6 +52,9 @@ class UploaderScreen(AppScreen):
     @threaded
     @toggle_cancel("mass_upload_button")
     def mass_upload(self):
+        if not self.ids["terms_accepted"].active:
+            logger.info(f"You don't have the right")
+            return
         chapters = self.chapters.copy()
         for idx, chapter in enumerate(chapters):
             if self.action_cancelled:

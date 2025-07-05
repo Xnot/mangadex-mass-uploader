@@ -154,7 +154,7 @@ class MangaDexAPI(metaclass=Singleton):
         self.send_request(
             "post",
             f"upload/{self._upload_session}/commit",
-            json={"chapterDraft": chapter_draft, "pageOrder": page_order},
+            json={"chapterDraft": chapter_draft, "pageOrder": page_order, "termsAccepted": True},
         )
         self._upload_session = None
 
